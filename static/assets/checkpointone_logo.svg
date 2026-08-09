@@ -1,27 +1,22 @@
-<svg width="100%" viewBox="0 0 680 406.72" xmlns="http://www.w3.org/2000/svg" role="img" style="">
-<title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">CheckPointOne logo</title>
-<desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">A geometric shield emblem with a checkmark and concentric gate rings, above the wordmark CheckPointOne, representing an OAuth checkpoint/authentication service.</desc>
-<defs>
-<clipPath id="shieldClip">
-<path d="M340 90 L420 118 L420 210 Q420 275 340 320 Q260 275 260 210 L260 118 Z"/>
-</clipPath>
-</defs>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CheckPointOne shield logo">
+  <title>CheckPointOne logo</title>
+  <desc>A navy rounded-square badge with a blue shield emblem and white checkmark, representing an OAuth checkpoint/authentication service.</desc>
 
-<circle cx="340" cy="195" r="120" fill="none" stroke="#2f6fed" stroke-width="1.5" opacity="0.25" style="fill:none;stroke:rgb(47, 111, 237);color:rgb(11, 11, 11);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.25;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-<circle cx="340" cy="195" r="145" fill="none" stroke="#2f6fed" stroke-width="1.5" opacity="0.12" style="fill:none;stroke:rgb(47, 111, 237);color:rgb(11, 11, 11);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.12;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <rect width="200" height="200" rx="24" fill="#0e2a63"/>
 
-<path d="M340 90 L420 118 L420 210 Q420 275 340 320 Q260 275 260 210 L260 118 Z" fill="#173a8a" style="fill:rgb(23, 58, 138);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-<g clip-path="url(#shieldClip)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
-<rect x="260" y="90" width="160" height="230" fill="#1f4fc4" style="fill:rgb(31, 79, 196);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-<rect x="260" y="205" width="160" height="115" fill="#173a8a" style="fill:rgb(23, 58, 138);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-</g>
-<path d="M340 90 L420 118 L420 210 Q420 275 340 320 Q260 275 260 210 L260 118 Z" fill="none" stroke="#0e2a63" stroke-width="2" style="fill:none;stroke:rgb(14, 42, 99);color:rgb(11, 11, 11);stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="100" cy="98" r="78" fill="none" stroke="#2f6fed" stroke-width="1.5" opacity="0.18"/>
 
-<path d="M300 195 L330 228 L385 158" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(11, 11, 11);stroke-width:14px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <defs>
+    <clipPath id="shieldClip">
+      <path d="M100 32 L144 49 L144 100 Q144 140 100 160 Q56 140 56 100 L56 49 Z"/>
+    </clipPath>
+  </defs>
 
-<line x1="240" y1="195" x2="260" y2="195" stroke="#2f6fed" stroke-width="3" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(47, 111, 237);color:rgb(11, 11, 11);stroke-width:3px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-<line x1="420" y1="195" x2="440" y2="195" stroke="#2f6fed" stroke-width="3" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(47, 111, 237);color:rgb(11, 11, 11);stroke-width:3px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;anthropic-sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <g clip-path="url(#shieldClip)">
+    <rect x="56" y="32" width="88" height="70" fill="#1f4fc4"/>
+    <rect x="56" y="102" width="88" height="60" fill="#173a8a"/>
+  </g>
+  <path d="M100 32 L144 49 L144 100 Q144 140 100 160 Q56 140 56 100 L56 49 Z" fill="none" stroke="#0e2a63" stroke-width="2"/>
 
-<text x="340" y="368" text-anchor="middle" font-family="Anthropic Sans, sans-serif" font-size="34" font-weight="500" fill="var(--text-primary)" style="fill:rgb(11, 11, 11);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Anthropic Sans, sans-serif;font-size:34px;font-weight:500;text-anchor:middle;dominant-baseline:auto">CheckPoint<tspan fill="#2f6fed" style="fill:rgb(47, 111, 237);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Anthropic Sans, sans-serif;font-size:34px;font-weight:500;text-anchor:middle;dominant-baseline:auto">One</tspan></text>
-<text x="340" y="392" text-anchor="middle" font-family="Anthropic Sans, sans-serif" font-size="13" letter-spacing="2" fill="var(--text-secondary)" style="fill:rgb(82, 81, 78);stroke:none;color:rgb(11, 11, 11);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Anthropic Sans, sans-serif;font-size:13px;font-weight:400;text-anchor:middle;dominant-baseline:auto">SECURE IDENTITY GATEWAY</text>
+  <path d="M78 100 L94 118 L124 82" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

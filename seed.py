@@ -21,7 +21,7 @@ SEED_APPLICATIONS = [
 ]
 
 
-def seed_applications():
+def seed_database():
     Base.metadata.create_all(engine)
 
     with SessionLocal() as session:

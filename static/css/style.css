@@ -80,9 +80,9 @@ code {
 }
 
 .auth-logo {
-  width: 64px;
-  height: auto;
-  margin-bottom: 1rem;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 1.25rem;
 }
 
 .auth-heading {
@@ -120,6 +120,58 @@ code {
 .auth-input:focus {
   outline: 2px solid #2f6fed;
   outline-offset: 1px;
+}
+
+.auth-password-wrap {
+  position: relative;
+  display: flex;
+}
+
+.auth-password-wrap .auth-input {
+  flex: 1;
+  padding-right: 2.5rem;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.auth-password-toggle:hover {
+  color: var(--fg);
+}
+
+.auth-password-toggle:focus-visible {
+  outline: 2px solid #2f6fed;
+  outline-offset: 1px;
+}
+
+.auth-password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.auth-password-toggle .icon-eye-off {
+  display: none;
+}
+
+.auth-password-toggle.is-visible .icon-eye {
+  display: none;
+}
+
+.auth-password-toggle.is-visible .icon-eye-off {
+  display: block;
 }
 
 .auth-submit {
