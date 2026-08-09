@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request
 
-from services.applications import (
+from repo.applications import (
     allowed_redirect_uri,
     get_application_by_client_id,
     get_tenant_from_application,

@@ -3,9 +3,9 @@ from models.application import Application
 from models.base import Base
 from models.tenant import Tenant
 from models.user import User
-from services.applications import get_application_by_client_id
-from services.tenants import get_tenant_by_slug
-from services.user import get_user_from_email
+from repo.applications import get_application_by_client_id
+from repo.tenants import get_tenant_by_slug
+from repo.user import get_user_from_email
 
 SEED_APPLICATION = [
     {
