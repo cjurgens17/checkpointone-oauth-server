@@ -40,4 +40,4 @@ def valid_redirect_uri(redirect_uri):
     return True
 
 def valid_response_type(response_type):
-    return response_type == "code"
+    return response_type in ["code", "token"]

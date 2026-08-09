@@ -45,11 +45,12 @@ def authorize():
             title="Authorization Error",
             redirect_uri=redirect_uri,
         ), 400
-
+    
+    # RFC 6749 - https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1
     if not response_type or not valid_response_type(response_type):
         return redirect_with_error(
             redirect_uri,
-            error="invalid_request",
+            error="unsupported_response_type",
             error_description="The response_type parameter is missing or not supported.",
             state=state,
         )
