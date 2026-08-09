@@ -69,3 +69,83 @@ code {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+.auth-card {
+  max-width: 360px;
+  margin: 2rem auto 0;
+  padding: 2rem 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.auth-logo {
+  width: 64px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.auth-heading {
+  margin: 0 0 0.35rem;
+  font-size: 1.4rem;
+}
+
+.auth-subheading {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.auth-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.auth-input {
+  padding: 0.6rem 0.7rem;
+  font-size: 0.95rem;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.auth-input:focus {
+  outline: 2px solid #2f6fed;
+  outline-offset: 1px;
+}
+
+.auth-submit {
+  margin-top: 1.5rem;
+  padding: 0.65rem 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: #2f6fed;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.auth-submit:hover {
+  background: #1f4fc4;
+}
+
+.auth-link {
+  display: inline-block;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: #2f6fed;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}

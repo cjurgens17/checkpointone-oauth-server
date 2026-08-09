@@ -2,13 +2,13 @@ from database import SessionLocal, engine
 from models.application import Application
 from models.base import Base
 from models.tenant import Tenant
-from models.user import User  # noqa: F401 - needed to register the mapper before create_all
 from services.applications import get_application_by_client_id
 from services.tenants import get_tenant_by_slug
 
 APPLICATION_DEFAULT_SCOPE = ["profile", "openid", "email"]
 
 SEED_TENANT_SLUG = "hackathon"
+SEED_TENANT_LOGO_URL = "/static/assets/checkpointone_logo.svg"
 
 SEED_APPLICATIONS = [
     {
@@ -27,7 +27,7 @@ def seed_applications():
     with SessionLocal() as session:
         tenant = get_tenant_by_slug(SEED_TENANT_SLUG)
         if tenant is None:
-            tenant = Tenant(slug=SEED_TENANT_SLUG)
+            tenant = Tenant(slug=SEED_TENANT_SLUG, logo_url=SEED_TENANT_LOGO_URL)
             session.add(tenant)
             session.flush()
 

@@ -39,10 +39,7 @@ def valid_redirect_uri(redirect_uri: str):
     if not parsed.scheme or not parsed.netloc:
         return False
 
-    if _CONTROL_CHARS.search(unquote(parsed.query)):
-        return False
-
-    return True
+    return not _CONTROL_CHARS.search(unquote(parsed.query))
 
 def valid_response_type(response_type: str):
     return response_type.lower() in ["code", "token"]

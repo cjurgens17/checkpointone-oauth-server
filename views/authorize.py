@@ -1,8 +1,18 @@
 from flask import Blueprint, render_template, request
 
-from services.applications import allowed_redirect_uri, get_application_by_client_id
+from services.applications import (
+    allowed_redirect_uri,
+    get_application_by_client_id,
+    get_tenant_from_application,
+)
 from utility.oauth_errors import redirect_with_error
-from utility.validation import valid_code_challenge_method, valid_connection, valid_redirect_uri, valid_response_type, valid_scope
+from utility.validation import (
+    valid_code_challenge_method,
+    valid_connection,
+    valid_redirect_uri,
+    valid_response_type,
+    valid_scope,
+)
 
 authorize_bp = Blueprint("authorize", __name__)
 
@@ -77,6 +87,23 @@ def authorize():
             error="invalid_connection",
             error_description="The connection is malformed or not supported",
             state=state
+        )
+
+    if connection == "Username-Password-Authentication":
+        tenant = get_tenant_from_application(application.client_id)
+        return render_template(
+            "login.html",
+            title="Log In",
+            application=application,
+            tenant=tenant,
+            response_type=response_type,
+            client_id=client_id,
+            redirect_uri=redirect_uri,
+            scope=scope,
+            state=state,
+            connection=connection,
+            code_challenge=code_challenge,
+            code_challenge_method=code_challenge_method,
         )
 
 

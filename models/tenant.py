@@ -9,3 +9,4 @@ class Tenant(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     slug: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    logo_url: Mapped[str] = mapped_column(String)

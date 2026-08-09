@@ -2,6 +2,7 @@ from sqlalchemy import select
 
 from database import SessionLocal
 from models.application import Application
+from models.tenant import Tenant
 
 
 def get_application_by_client_id(client_id: str) -> Application | None:
@@ -17,3 +18,15 @@ def allowed_redirect_uri(redirect_uri: str, client_id: str) -> bool:
     if application is None:
         return False
     return redirect_uri in application.redirect_uris
+
+
+def get_tenant_from_application(client_id: str):
+    if not client_id:
+        return None
+    with SessionLocal() as session:
+        stmt = (
+            select(Tenant)
+            .join(Application, Application.tenant_id == Tenant.id)
+            .where(Application.client_id == client_id)
+        )
+        return session.scalars(stmt).first()
