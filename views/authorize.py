@@ -89,23 +89,30 @@ def authorize():
             state=state
         )
 
-    if connection == "Username-Password-Authentication":
-        tenant = get_tenant_from_application(application.client_id)
-        return render_template(
-            "login.html",
-            title="Log In",
-            application=application,
-            tenant=tenant,
-            response_type=response_type,
-            client_id=client_id,
-            redirect_uri=redirect_uri,
-            scope=scope,
-            state=state,
-            connection=connection,
-            code_challenge=code_challenge,
-            code_challenge_method=code_challenge_method,
-        )
-
-
-
-    return "Hello World"
+    tenant = get_tenant_from_application(application.client_id)
+    
+    match(connection):
+        #Add OpenID providers as we expand
+        case "Username-Password-Authentication":
+            return render_template(
+                "login.html",
+                title="Log In",
+                application=application,
+                tenant=tenant,
+                response_type=response_type,
+                client_id=client_id,
+                redirect_uri=redirect_uri,
+                scope=scope,
+                state=state,
+                connection=connection,
+                code_challenge=code_challenge,
+                code_challenge_method=code_challenge_method,
+            )
+        case "google-oauth2":
+            return "redirect to googles auth server"
+        case "facebook":
+            return "redirect to facebooks auth server"
+        case "github":
+            return "redirect to githubs auth server"
+        case _:
+            return "Hello World"
