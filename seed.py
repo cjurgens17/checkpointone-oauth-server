@@ -23,6 +23,7 @@ SEED_USER = [
         "email": "test@checkpointone.com",
         "sub": "cp1 | slkj234lksjdfl2",
         "connection": "Username-Password-Authentication",
+        "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
     }
 ]
 
@@ -34,9 +35,12 @@ SEED_TENANT = [
 def seed_database():
     Base.metadata.create_all(engine)
     with SessionLocal() as session:
-        for tenant in SEED_TENANT:
-            if not get_tenant_by_slug(tenant["slug"]):
-                session.add(Tenant(**tenant))
+        tenant = None
+        for tenant_data in SEED_TENANT:
+            tenant = get_tenant_by_slug(tenant_data["slug"])
+            if tenant is None:
+                tenant = Tenant(**tenant_data)
+                session.add(tenant)
                 # Force Insert to get id
                 session.flush()
         for application in SEED_APPLICATION:
@@ -44,5 +48,5 @@ def seed_database():
                 session.add(Application(**application, tenant_id=tenant.id))
         for user in SEED_USER:
             if not get_user_from_email(user["email"]):
-                session.add(User(**user), tenant_id=tenant.id)
+                session.add(User(**user, tenant_id=tenant.id))
         session.commit()
