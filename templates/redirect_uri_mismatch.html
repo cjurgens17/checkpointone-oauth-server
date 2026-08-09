@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>Unregistered redirect_uri</h1>
+    <p>The <code>redirect_uri</code> provided does not match any URI registered for this application.</p>
+    {% if redirect_uri %}
+      <p class="error-detail">redirect_uri: <code>{{ redirect_uri }}</code></p>
+    {% endif %}
+    <p class="error-detail">
+      If you're the developer of the application that sent you here, check that
+      this exact <code>redirect_uri</code> is registered for the client.
+    </p>
+  </div>
+{% endblock %}

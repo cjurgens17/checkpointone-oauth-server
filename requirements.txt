@@ -1,0 +1,5 @@
+Flask==3.0.3
+Flask-RESTful==0.3.10
+SQLAlchemy==2.0.35
+psycopg[binary]==3.2.10
+python-dotenv==1.0.1

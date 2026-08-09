@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>Invalid redirect_uri</h1>
+    <p>The <code>redirect_uri</code> provided is not a valid, fully-qualified URI.</p>
+    {% if redirect_uri %}
+      <p class="error-detail">redirect_uri: <code>{{ redirect_uri }}</code></p>
+    {% endif %}
+    <p class="error-detail">
+      If you're the developer of the application that sent you here, make sure
+      <code>redirect_uri</code> includes a scheme and host (e.g.
+      <code>https://example.com/callback</code>), uses only valid URI
+      characters, and is correctly percent-encoded.
+    </p>
+  </div>
+{% endblock %}

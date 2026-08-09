@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>Missing redirect_uri</h1>
+    <p>This authorization request is missing the required <code>redirect_uri</code> parameter.</p>
+    <p class="error-detail">
+      If you're the developer of the application that sent you here, include a
+      <code>redirect_uri</code> that matches one registered for this client.
+    </p>
+  </div>
+{% endblock %}

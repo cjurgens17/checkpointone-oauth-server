@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>We can't process this authorization request</h1>
+    <p>{{ message }}</p>
+    {% if client_id %}
+      <p class="error-detail">client_id: <code>{{ client_id }}</code></p>
+    {% endif %}
+    <p class="error-detail">
+      If you're the developer of the application that sent you here, double-check
+      the <code>client_id</code> it's using and make sure it's registered.
+    </p>
+  </div>
+{% endblock %}
