@@ -1,0 +1,38 @@
+# CheckPointOne OAuth Server
+
+A minimal, multi-tenant OAuth 2.0 authorization server
+## Features
+
+- Grant Types including Authorization Code Flow, Authorization Code Flow w/PKCE, Client Credential, and more.
+- Branded, multi connection login screen through OpenID utilization
+
+### Login screen
+
+![Login screen](docs/screenshots/login.png)
+
+## Getting started
+
+```bash
+docker compose up -d
+```
+
+This builds and starts two services:
+
+- `web` — Authorization Server spins up on localhost. Applies the current model schema and seeds a demo tenant/application on startup.
+- `db` — Postgres database
+
+Try the seeded demo application's authorization request:
+
+```
+http://localhost:5000/authorize?response_type=code&client_id=client_sdlkfj234kdjf2l34&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fcallback&scope=openid%20profile%20email&state=xyz123&connection=Username-Password-Authentication&code_challenge=abc&code_challenge_method=S256
+```
+
+### Local (non-Docker) development
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # points DATABASE_URL at the Dockerized Postgres on :5433
+python app.py
+```
