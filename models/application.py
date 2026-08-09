@@ -1,15 +1,11 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
 from .base import Base
-
-if TYPE_CHECKING:
-    from .tenant import Tenant
 
 
 class Application(Base):
@@ -23,5 +19,3 @@ class Application(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     scope: Mapped[list[str]] = mapped_column(ARRAY(String(30)))
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenant.id"))
-
-    tenant: Mapped["Tenant"] = relationship(back_populates="applications")

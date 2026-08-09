@@ -1,12 +1,7 @@
-from typing import TYPE_CHECKING
-
 from sqlalchemy import CheckConstraint, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
-
-if TYPE_CHECKING:
-    from .tenant import Tenant
 
 
 class User(Base):
@@ -25,5 +20,3 @@ class User(Base):
     connection: Mapped[str] = mapped_column(String(64))
     password: Mapped[str] = mapped_column(String(255), nullable=True)
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenant.id"))
-
-    tenant: Mapped["Tenant"] = relationship(back_populates="users")
