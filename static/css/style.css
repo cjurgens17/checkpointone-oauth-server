@@ -43,6 +43,64 @@ body {
   padding: 2rem 1.5rem;
 }
 
+/* Auth page: animated brand gradient + pulsing checkpoint rings, echoing the shield SVG's palette and gate-ring motif. */
+body.auth-background {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: linear-gradient(-45deg, #0e2a63, #173a8a, #2f6fed, #1f4fc4, #0e2a63);
+  background-size: 400% 400%;
+  animation: auth-gradient-flow 16s ease-in-out infinite;
+}
+
+@keyframes auth-gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body.auth-background::before,
+body.auth-background::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 640px;
+  height: 640px;
+  margin: -320px 0 0 -320px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  pointer-events: none;
+  animation: auth-ring-pulse 7s ease-in-out infinite;
+}
+
+body.auth-background::after {
+  width: 900px;
+  height: 900px;
+  margin: -450px 0 0 -450px;
+  border-color: rgba(255, 255, 255, 0.08);
+  animation-delay: 2s;
+  animation-duration: 9s;
+}
+
+@keyframes auth-ring-pulse {
+  0%, 100% { transform: scale(0.92); opacity: 0.45; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+body.auth-background .container {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.auth-background,
+  body.auth-background::before,
+  body.auth-background::after {
+    animation: none;
+  }
+}
+
 code {
   background: var(--border);
   padding: 0.1rem 0.35rem;
@@ -74,8 +132,13 @@ code {
   max-width: 360px;
   margin: 2rem auto 0;
   padding: 2rem 1.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(6, 20, 56, 0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: #16224a;
   text-align: center;
 }
 
@@ -92,7 +155,7 @@ code {
 
 .auth-subheading {
   margin: 0 0 1.5rem;
-  color: var(--muted);
+  color: #5b6b8c;
   font-size: 0.9rem;
 }
 
@@ -111,9 +174,9 @@ code {
 .auth-input {
   padding: 0.6rem 0.7rem;
   font-size: 0.95rem;
-  color: var(--fg);
-  background: var(--bg);
-  border: 1px solid var(--border);
+  color: #16224a;
+  background: #ffffff;
+  border: 1px solid #c7d2e8;
   border-radius: 6px;
 }
 
@@ -143,13 +206,13 @@ code {
   padding: 0.25rem;
   background: none;
   border: none;
-  color: var(--muted);
+  color: #5b6b8c;
   cursor: pointer;
   border-radius: 4px;
 }
 
 .auth-password-toggle:hover {
-  color: var(--fg);
+  color: #16224a;
 }
 
 .auth-password-toggle:focus-visible {
