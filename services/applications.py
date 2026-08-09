@@ -5,6 +5,8 @@ from models.application import Application
 
 
 def get_application_by_client_id(client_id: str) -> Application | None:
+    if not client_id:
+        return None
     with SessionLocal() as session:
         stmt = select(Application).where(Application.client_id == client_id)
         return session.scalars(stmt).first()

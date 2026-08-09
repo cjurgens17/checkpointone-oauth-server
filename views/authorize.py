@@ -18,7 +18,9 @@ def authorize():
     code_challenge = request.args.get("code_challenge")
     code_challenge_method = request.args.get("code_challenge_method")
 
-    if not client_id or not get_application_by_client_id(client_id):
+    application = get_application_by_client_id(client_id)
+
+    if not application:
         return render_template(
             "authorize_error.html",
             title="Authorization Error",
@@ -37,7 +39,7 @@ def authorize():
             title="Authorization Error",
             redirect_uri=redirect_uri,
         ), 400
-    elif not allowed_redirect_uri(redirect_uri, client_id):
+    elif not allowed_redirect_uri(redirect_uri, application.client_id):
         return render_template(
             "redirect_uri_mismatch.html",
             title="Authorization Error",
