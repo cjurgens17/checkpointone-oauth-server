@@ -23,3 +23,9 @@ def redeem_auth_code(code):
     data = cache_get(code)
     cache_delete(code)
     return data
+
+def auth_code_expired(data):
+    expires_at = data.get("expires_at")
+    if not expires_at:
+        return True
+    return datetime.now(timezone.utc) >= datetime.fromisoformat(expires_at)
