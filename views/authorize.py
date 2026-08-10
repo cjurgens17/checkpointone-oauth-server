@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, redirect, render_template, request
 
 from repo.applications import (
     allowed_redirect_uri,
     get_application_by_client_id,
     get_tenant_from_application,
+)
+from services.connections.google import (
+    build_google_authorization_url,
+    prepare_redirect_to_oauth_server,
 )
 from services.connections.username_password_authentication import (
     authenticate_user_success,
@@ -138,7 +142,17 @@ def authorize():
                 code_challenge_method=code_challenge_method,
             )
         case "google-oauth2":
-            return "redirect to googles auth server"
+            server_state = prepare_redirect_to_oauth_server({
+                "state": state,
+                "redirect_uri": redirect_uri,
+                "code_challenge_method": code_challenge_method,
+                "code_challenge": code_challenge,
+                "scope": scope,
+                "client_id": client_id,
+                "response_type": response_type
+            })
+            google_scope = "openid email"
+            return redirect(build_google_authorization_url(server_state, google_scope))
         case "facebook":
             return "redirect to facebooks auth server"
         case "github":
