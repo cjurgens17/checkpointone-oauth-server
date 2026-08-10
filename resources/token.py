@@ -1,8 +1,7 @@
 from flask import request
 from flask_restful import Resource
 
-from services.tokens.authorization_code import auth_code_expired
-from utility.redis.cache import cache_delete, cache_get
+from services.tokens.authorization_code import auth_code_expired, redeem_auth_code
 
 REQUIRED_PARAMS = [
     "code",
@@ -29,10 +28,9 @@ class Token(Resource):
         #If client secret is available then authenticate the client via a client credential grant before continuing.
         #Verify Auth Code and not expired, Correct Client, and Redirect Uri
 
-        client_metadata = cache_get(body.get("code"))
-        if client_metadata:
-            cache_delete(body.get("code"))
-        elif not client_metadata or auth_code_expired(client_metadata):
+        client_metadata = redeem_auth_code(body.get("code"))
+        
+        if not client_metadata or auth_code_expired(client_metadata):
             return {
                 "error": "invalid_authorization",
                 "error_description": "invalid authorization code",
@@ -47,5 +45,7 @@ class Token(Resource):
                 "error": "invalid_redirect",
                 "error_description": "the provided redirect uri is missing or not supported",
             }, 400
+
+        #Add PKCE verification is presented with code_verifier -> then move on to generating the access tokens.
 
         return "token"
