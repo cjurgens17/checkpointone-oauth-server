@@ -1,6 +1,5 @@
 import os
 import time
-from urllib.parse import urlencode
 
 import jwt
 import requests
@@ -28,17 +27,6 @@ def prepare_redirect_to_oauth_server(data: dict):
     }
     cache_set(server_state, nonce, 1000)
     return server_state
-
-
-def build_google_authorization_url(state: str, scope: str) -> str:
-    params = {
-        "client_id": GOOGLE_CLIENT_ID,
-        "redirect_uri": GOOGLE_REDIRECT_URI,
-        "response_type": "code",
-        "scope": scope,
-        "state": state,
-    }
-    return f"{GOOGLE_AUTHORIZATION_ENDPOINT}?{urlencode(params)}"
 
 
 def exchange_code_for_id_token(code: str) -> str:

@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, redirect, render_template, request
 
 from repo.applications import get_application_by_client_id
 from repo.user import get_or_create_user_from_sub
@@ -6,6 +6,9 @@ from services.connections.google import (
     exchange_code_for_id_token,
     verify_google_id_token,
 )
+from services.tokens.authorization_code import create_auth_code
+from utility.helpers import build_encoded_url
+from utility.oauth_errors import redirect_with_error
 from utility.redis.cache import cache_delete, cache_get
 
 google_callback_bp = Blueprint("callbacks_google", __name__)
@@ -14,14 +17,27 @@ google_callback_bp = Blueprint("callbacks_google", __name__)
 @google_callback_bp.get("/callback/google")
 def google_callback():
     returned_state = request.args.get("state")
+    error = request.args.get("error")
     code = request.args.get("code")
 
     nonce = cache_get(returned_state)
     if not nonce:
-        return "The state parameter is invalid, expired, or was already used.", 400
+        return render_template(
+            "state_invalid.html",
+            title="Authorization Error",
+        ), 400
     cache_delete(returned_state)
 
     resource_owner_request = nonce["resource_owner"]
+
+    if error and error == "access_denied":
+        return redirect_with_error(
+                resource_owner_request["redirect_uri"],
+                error="access_denied",
+                error_description="Access to the provider has been cancelled or invalidated",
+                state=resource_owner_request["state"]
+            )
+
 
     id_token = exchange_code_for_id_token(code)
     claims = verify_google_id_token(id_token)
@@ -29,23 +45,15 @@ def google_callback():
     sub = f"google-oauth2 | {claims['sub']}"
 
     application = get_application_by_client_id(resource_owner_request["client_id"])
-    user = get_or_create_user_from_sub(sub, {
+    get_or_create_user_from_sub(sub, {
         "username": claims["email"],
         "email": claims["email"],
         "connection": "google-oauth2",
         "tenant_id": application.tenant_id,
     })
 
-    user_view = {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "sub": user.sub,
-        "connection": user.connection,
-        "tenant_id": user.tenant_id,
-    }
+    resource_owner_request["sub"] = sub
 
-    print(claims)
-    print(user_view)
-
-    return {"claims": claims, "user": user_view}
+    auth_code = create_auth_code(resource_owner_request)
+    params = {"state" : resource_owner_request["state"], "code": auth_code}
+    return redirect(build_encoded_url(resource_owner_request["redirect_uri"], params))
