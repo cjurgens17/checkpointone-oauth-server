@@ -9,6 +9,10 @@
     <h1 class="auth-heading">Log In</h1>
     <p class="auth-subheading">to continue to <strong>{{ application.name }}</strong></p>
 
+    {% if error %}
+      <p class="auth-error">{{ error }}</p>
+    {% endif %}
+
     <form class="auth-form" method="post" action="{{ url_for('authorize.authorize') }}">
       <input type="hidden" name="response_type" value="{{ response_type or '' }}">
       <input type="hidden" name="client_id" value="{{ client_id or '' }}">
@@ -20,7 +24,7 @@
       <input type="hidden" name="code_challenge_method" value="{{ code_challenge_method or '' }}">
 
       <label class="auth-label" for="username">Username or email address</label>
-      <input class="auth-input" type="text" id="username" name="username" autocomplete="username" required autofocus>
+      <input class="auth-input" type="text" id="username" name="username" value="{{ username or '' }}" autocomplete="username" required autofocus>
 
       <label class="auth-label" for="password">Password</label>
       <div class="auth-password-wrap">
