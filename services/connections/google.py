@@ -68,7 +68,7 @@ def exchange_code_for_id_token(code: str) -> str:
 
 def verify_google_id_token(id_token: str) -> dict:
     signing_key = _jwks_client.get_signing_key_from_jwt(id_token)
-
+    #jwt.decode does an implicit exp claim check
     claims = jwt.decode(
         id_token,
         signing_key.key,
@@ -76,7 +76,7 @@ def verify_google_id_token(id_token: str) -> dict:
         audience=GOOGLE_CLIENT_ID,
         issuer=GOOGLE_ISSUER,
     )
-
+    
     if claims["iat"] > time.time():
         raise ValueError("id_token was issued in the future")
 
