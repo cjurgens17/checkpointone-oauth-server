@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>Invalid or expired state</h1>
+    <p>The <code>state</code> parameter is invalid, expired, or was already used.</p>
+    <p class="error-detail">
+      This can happen if the sign-in flow took too long, was started more than
+      once, or was tampered with. Return to the application and try signing
+      in again.
+    </p>
+  </div>
+{% endblock %}

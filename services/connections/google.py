@@ -1,11 +1,8 @@
-import json
 import os
 import time
-from urllib.error import HTTPError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 
 import jwt
+import requests
 from jwt import PyJWKClient
 
 from utility.helpers import generate_state
@@ -19,8 +16,7 @@ GOOGLE_TOKEN_ENDPOINT = os.getenv("GOOGLE_TOKEN_ENDPOINT")
 GOOGLE_JWKS_URL = os.getenv("GOOGLE_JWKS_URL")
 GOOGLE_ISSUER = os.getenv("GOOGLE_ISSUER")
 
-# Fetches + caches Google's published signing keys (and re-fetches on an
-# unrecognized kid, e.g. after Google rotates its keys) instead of hardcoding them.
+# Fetches + caches Google's published signing keys 
 _jwks_client = PyJWKClient(GOOGLE_JWKS_URL, cache_keys=True)
 
 
@@ -33,36 +29,21 @@ def prepare_redirect_to_oauth_server(data: dict):
     return server_state
 
 
-def build_google_authorization_url(state: str, scope: str) -> str:
-    params = {
-        "client_id": GOOGLE_CLIENT_ID,
-        "redirect_uri": GOOGLE_REDIRECT_URI,
-        "response_type": "code",
-        "scope": scope,
-        "state": state,
-    }
-    return f"{GOOGLE_AUTHORIZATION_ENDPOINT}?{urlencode(params)}"
-
-
 def exchange_code_for_id_token(code: str) -> str:
-    # Google requires application/x-www-form-urlencoded per RFC spec
-    payload = urlencode({
+    payload = {
         "code": code,
         "client_id": GOOGLE_CLIENT_ID,
         "client_secret": GOOGLE_CLIENT_SECRET,
         "redirect_uri": GOOGLE_REDIRECT_URI,
         "grant_type": "authorization_code",
-    }).encode()
+    }
 
-    headers = {"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json"}
-    
-    request = Request(GOOGLE_TOKEN_ENDPOINT, data=payload, method="POST", headers=headers)
+    headers = {"Accept": "application/json"}
+    response = requests.post(GOOGLE_TOKEN_ENDPOINT, data=payload, headers=headers)
     try:
-        with urlopen(request) as response:
-            tokens = json.loads(response.read())
-    except HTTPError as error:
-        raise ValueError(f"Google token exchange failed: {error.read().decode()}") from error
-
+        tokens = response.json()
+    except Exception as error:
+        raise ValueError(f"Google token exchange failed: {response.text}") from error
     return tokens["id_token"]
 
 

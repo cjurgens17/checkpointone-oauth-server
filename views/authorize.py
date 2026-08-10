@@ -6,12 +6,15 @@ from repo.applications import (
     get_tenant_from_application,
 )
 from services.connections.google import (
-    build_google_authorization_url,
+    GOOGLE_AUTHORIZATION_ENDPOINT,
+    GOOGLE_CLIENT_ID,
+    GOOGLE_REDIRECT_URI,
     prepare_redirect_to_oauth_server,
 )
 from services.connections.username_password_authentication import (
     authenticate_user_success,
 )
+from utility.helpers import build_encoded_url
 from utility.oauth_errors import redirect_with_error
 from utility.validation import (
     valid_code_challenge_method,
@@ -152,7 +155,14 @@ def authorize():
                 "response_type": response_type
             })
             google_scope = "openid email"
-            return redirect(build_google_authorization_url(server_state, google_scope))
+            params = {
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "redirect_uri": GOOGLE_REDIRECT_URI,
+                    "response_type": "code",
+                    "scope": google_scope,
+                    "state": server_state,
+                }
+            return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
         case "facebook":
             return "redirect to facebooks auth server"
         case "github":
