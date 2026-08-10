@@ -16,10 +16,11 @@ A minimal, multi-tenant OAuth 2.0 authorization server
 docker compose up -d
 ```
 
-This builds and starts two services:
+This builds and starts three services:
 
 - `web` — Authorization Server spins up on localhost. Applies the current model schema and seeds a demo tenant/application on startup.
 - `db` — Postgres database
+- `redis` — Cache used to store short-lived OAuth state (e.g. state/nonce pairs during the OpenID login flow)
 
 Try the seeded demo application's authorization request:
 
@@ -33,6 +34,12 @@ http://localhost:5000/authorize?response_type=code&client_id=client_sdlkfj234kdj
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # points DATABASE_URL at the Dockerized Postgres on :5433
+cp .env.example .env   # points DATABASE_URL/REDIS_URL at the Dockerized Postgres/Redis on :5433/:6379
 python app.py
+```
+
+Postgres and Redis still need to be running for local (non-Docker) development, so start just those two services with:
+
+```bash
+docker compose up -d db redis
 ```
