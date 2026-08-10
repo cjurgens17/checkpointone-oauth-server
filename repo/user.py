@@ -10,3 +10,24 @@ def get_user_from_email(email: str):
     with SessionLocal() as session:
         stmt = select(User).where(User.email == email)
         return session.scalars(stmt).first()
+
+
+def get_user_from_sub(sub: str):
+    if not sub:
+        return None
+    with SessionLocal() as session:
+        stmt = select(User).where(User.sub == sub)
+        return session.scalars(stmt).first()
+
+
+def get_or_create_user_from_sub(sub: str, defaults: dict):
+    with SessionLocal() as session:
+        stmt = select(User).where(User.sub == sub)
+        user = session.scalars(stmt).first()
+        if user:
+            return user
+
+        user = User(sub=sub, **defaults)
+        session.add(user)
+        session.commit()
+        return user

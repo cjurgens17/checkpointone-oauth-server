@@ -1,9 +1,16 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, redirect, render_template, request
 
 from repo.applications import (
     allowed_redirect_uri,
     get_application_by_client_id,
     get_tenant_from_application,
+)
+from services.connections.google import (
+    build_google_authorization_url,
+    prepare_redirect_to_oauth_server,
+)
+from services.connections.username_password_authentication import (
+    authenticate_user_success,
 )
 from utility.oauth_errors import redirect_with_error
 from utility.validation import (
@@ -17,16 +24,16 @@ from utility.validation import (
 authorize_bp = Blueprint("authorize", __name__)
 
 
-@authorize_bp.get("/authorize")
+@authorize_bp.route("/authorize", methods=["GET", "POST"])
 def authorize():
-    response_type = request.args.get("response_type")
-    client_id = request.args.get("client_id")
-    redirect_uri = request.args.get("redirect_uri")
-    scope = request.args.get("scope", "openid email profile")
-    state = request.args.get("state")
-    connection = request.args.get("connection", "Username-Password-Authentication")
-    code_challenge = request.args.get("code_challenge")
-    code_challenge_method = request.args.get("code_challenge_method")
+    response_type = request.values.get("response_type")
+    client_id = request.values.get("client_id")
+    redirect_uri = request.values.get("redirect_uri")
+    scope = request.values.get("scope", "openid email profile")
+    state = request.values.get("state")
+    connection = request.values.get("connection", "Username-Password-Authentication")
+    code_challenge = request.values.get("code_challenge")
+    code_challenge_method = request.values.get("code_challenge_method")
 
     application = get_application_by_client_id(client_id)
 
@@ -93,7 +100,33 @@ def authorize():
     
     match(connection):
         #Add OpenID providers as we expand
+        #Look Over RFC spec for secure implementation here
         case "Username-Password-Authentication":
+            username = request.form.get("username")
+            password = request.form.get("password")
+
+            if request.method == "POST":
+                if authenticate_user_success(username, password):
+                    #Create + store authorization code, redirect resource owner back to redirect_uri with state + code.
+                    return f"Authenticated as {username}"
+
+                return render_template(
+                    "login.html",
+                    title="Log In",
+                    application=application,
+                    tenant=tenant,
+                    response_type=response_type,
+                    client_id=client_id,
+                    redirect_uri=redirect_uri,
+                    scope=scope,
+                    state=state,
+                    connection=connection,
+                    code_challenge=code_challenge,
+                    code_challenge_method=code_challenge_method,
+                    error="Incorrect username or password.",
+                    username=username,
+                ), 401
+
             return render_template(
                 "login.html",
                 title="Log In",
@@ -109,7 +142,17 @@ def authorize():
                 code_challenge_method=code_challenge_method,
             )
         case "google-oauth2":
-            return "redirect to googles auth server"
+            server_state = prepare_redirect_to_oauth_server({
+                "state": state,
+                "redirect_uri": redirect_uri,
+                "code_challenge_method": code_challenge_method,
+                "code_challenge": code_challenge,
+                "scope": scope,
+                "client_id": client_id,
+                "response_type": response_type
+            })
+            google_scope = "openid email"
+            return redirect(build_google_authorization_url(server_state, google_scope))
         case "facebook":
             return "redirect to facebooks auth server"
         case "github":

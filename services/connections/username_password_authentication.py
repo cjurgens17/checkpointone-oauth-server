@@ -1,4 +1,3 @@
-from database import SessionLocal
 from repo.user import get_user_from_email
 from utility.helpers import hash_sha256
 
@@ -11,6 +10,7 @@ def authenticate_user_success(email: str, password: str):
 
     if not user:
         return False
-
-    return user.password == hash_sha256(password)
+    verified = user.password == hash_sha256(password)
+    print(f"Verified: {verified}")
+    return verified
     
