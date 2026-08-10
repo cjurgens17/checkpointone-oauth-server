@@ -6,7 +6,7 @@ from utility.redis.cache import cache_set
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
-GOOGLE_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_AUTHORIZATION_ENDPOINT = os.getenv("GOOGLE_AUTHORIZATION_ENDPOINT")
 
 
 def prepare_redirect_to_oauth_server(data: dict):
