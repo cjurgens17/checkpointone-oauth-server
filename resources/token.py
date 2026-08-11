@@ -1,8 +1,12 @@
 from flask import request
 from flask_restful import Resource
 
-from services.tokens.authorization_code import auth_code_expired
-from utility.redis.cache import cache_delete, cache_get
+from services.tokens.access_token import ACCESS_TOKEN_TTL_SECONDS, create_access_token
+from services.tokens.authorization_code import (
+    auth_code_expired,
+    redeem_auth_code,
+    valid_code_challenge,
+)
 
 REQUIRED_PARAMS = [
     "code",
@@ -10,11 +14,10 @@ REQUIRED_PARAMS = [
     "redirect_uri",
     "client_id",
     "audience",
-    "code_verifier",
 ]
 
 
-class Token(Resource):
+class OAuthToken(Resource):
     def post(self):
         body = request.get_json(silent=True) or {}
         params = {name: body.get(name) for name in REQUIRED_PARAMS}
@@ -25,14 +28,13 @@ class Token(Resource):
                 "error": "invalid_request",
                 "error_description": f"Missing required parameter(s): {', '.join(missing)}.",
             }, 400
+        # TODO
+        # If client secret is available then authenticate the client via a client credential grant before continuing.
+        # Verify Auth Code and not expired, Correct Client, and Redirect Uri
 
-        #If client secret is available then authenticate the client via a client credential grant before continuing.
-        #Verify Auth Code and not expired, Correct Client, and Redirect Uri
+        client_metadata = redeem_auth_code(body.get("code"))
 
-        client_metadata = cache_get(body.get("code"))
-        if client_metadata:
-            cache_delete(body.get("code"))
-        elif not client_metadata or auth_code_expired(client_metadata):
+        if not client_metadata or auth_code_expired(client_metadata):
             return {
                 "error": "invalid_authorization",
                 "error_description": "invalid authorization code",
@@ -48,4 +50,20 @@ class Token(Resource):
                 "error_description": "the provided redirect uri is missing or not supported",
             }, 400
 
-        return "token"
+        if body.get("code_verifier") and not valid_code_challenge(
+            body.get("code_verifier"),
+            client_metadata.get("code_challenge_method"),
+            client_metadata.get("code_challenge"),
+        ):
+            return {
+                "error": "invalid_request",
+                "error_description": "failed to identify correct code challenge",
+            }, 400
+
+        access_token = create_access_token(client_metadata)
+
+        return {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": ACCESS_TOKEN_TTL_SECONDS,
+        }

@@ -37,6 +37,7 @@ def authorize():
     connection = request.values.get("connection", "Username-Password-Authentication")
     code_challenge = request.values.get("code_challenge")
     code_challenge_method = request.values.get("code_challenge_method")
+    audience = request.values.get("audience")
 
     application = get_application_by_client_id(client_id)
 
@@ -152,7 +153,8 @@ def authorize():
                 "code_challenge": code_challenge,
                 "scope": scope,
                 "client_id": client_id,
-                "response_type": response_type
+                "response_type": response_type,
+                "audience": audience
             })
             google_scope = "openid email"
             params = {
