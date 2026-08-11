@@ -3,10 +3,11 @@ import time
 
 import jwt
 
+from utility.jwt_keys import JWT_KEY_ID, JWT_PRIVATE_KEY
+
 # REQUIRED CLAIMS: iss, exp, iat, aud, sub
 
 ISSUER = os.getenv("ISSUER", "http://localhost:5000")
-JWT_PRIVATE_KEY = os.getenv("JWT_PRIVATE_KEY", "").replace("\\n", "\n")
 ID_TOKEN_TTL_SECONDS = 3600
 
 _ADDITIONAL_OPENID_SCOPES = ["email", "profile", "phone", "address"]
@@ -55,7 +56,7 @@ def generate_id_token(client_metadata):
 
     payload = merge_provider_claims(scope, payload, provider_claims)
 
-    return jwt.encode(payload, JWT_PRIVATE_KEY, algorithm="RS256")
+    return jwt.encode(payload, JWT_PRIVATE_KEY, algorithm="RS256", headers={"kid": JWT_KEY_ID})
 
 
 def merge_provider_claims(scope: list[str], curr_claims, provider_claims):
