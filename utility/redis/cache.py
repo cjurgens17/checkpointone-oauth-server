@@ -3,8 +3,8 @@ from typing import Any
 
 from utility.redis.client import redis_client
 
-#state, authorization codes, redirect uri'ls are short lived
-DEFAULT_TTL_SECONDS = 300
+#Current Cache consist of state, authorization codes, resource owner arguments - all short lived so far
+DEFAULT_TTL_SECONDS = 900
 
 
 def cache_set(key: str, value: Any, ttl: int = DEFAULT_TTL_SECONDS) -> None:
