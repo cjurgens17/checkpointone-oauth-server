@@ -1,7 +1,11 @@
 from flask import request
 from flask_restful import Resource
 
-from services.tokens.authorization_code import auth_code_expired, redeem_auth_code
+from services.tokens.authorization_code import (
+    auth_code_expired,
+    redeem_auth_code,
+    valid_code_challenge,
+)
 
 REQUIRED_PARAMS = [
     "code",
@@ -9,7 +13,6 @@ REQUIRED_PARAMS = [
     "redirect_uri",
     "client_id",
     "audience",
-    "code_verifier",
 ]
 
 
@@ -24,9 +27,9 @@ class Token(Resource):
                 "error": "invalid_request",
                 "error_description": f"Missing required parameter(s): {', '.join(missing)}.",
             }, 400
-
-        #If client secret is available then authenticate the client via a client credential grant before continuing.
-        #Verify Auth Code and not expired, Correct Client, and Redirect Uri
+        #TODO
+            #If client secret is available then authenticate the client via a client credential grant before continuing.
+            #Verify Auth Code and not expired, Correct Client, and Redirect Uri
 
         client_metadata = redeem_auth_code(body.get("code"))
         
@@ -46,6 +49,18 @@ class Token(Resource):
                 "error_description": "the provided redirect uri is missing or not supported",
             }, 400
 
-        #Add PKCE verification is presented with code_verifier -> then move on to generating the access tokens.
+        if body.get("code_verifier") or body.get("code_challenge_method"):
+            if not (body.get("code_verifier") and body.get("code_challenge_method")):
+                return {
+                        "error": "invalid_request",
+                        "error_description": "missing required parameters to validate code challenge"
+                        }, 400
+            is_valid = valid_code_challenge(body.get("code_verifier"), body.get("code_challenge_method"), client_metadata.get("code_challenge"))
+            if not is_valid:
+                return {
+                        "error": "invalid_authorization",
+                        "error_description": "client has failed to recognize code challenge"
+                        }, 400
 
+        
         return "token"

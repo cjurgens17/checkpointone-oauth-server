@@ -1,7 +1,9 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 
+from utility.helpers import hash_sha256
 from utility.redis.cache import cache_delete, cache_get, cache_set
+from utility.validation import valid_code_challenge_method
 
 AUTH_CODE_TTL_SECONDS = 600
 
@@ -29,3 +31,11 @@ def auth_code_expired(data):
     if not expires_at:
         return True
     return datetime.now(timezone.utc) >= datetime.fromisoformat(expires_at)
+
+def valid_code_challenge(code_verifier, code_challenge_method, code_challenge):
+    if not valid_code_challenge_method(code_challenge_method):
+        return False
+    if code_challenge_method == "plain":
+        return code_verifier == code_challenge
+    return hash_sha256(code_verifier) == code_challenge
+
