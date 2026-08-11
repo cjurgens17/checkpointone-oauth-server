@@ -14,7 +14,7 @@ from services.connections.google import (
 from services.connections.username_password_authentication import (
     authenticate_user_success,
 )
-from utility.helpers import build_encoded_url
+from utility.helpers import build_encoded_url, retrieve_open_id_scope
 from utility.oauth_errors import redirect_with_error
 from utility.validation import (
     valid_code_challenge_method,
@@ -146,24 +146,33 @@ def authorize():
                 code_challenge_method=code_challenge_method,
             )
         case "google-oauth2":
-            server_state = prepare_redirect_to_oauth_server({
-                "state": state,
-                "redirect_uri": redirect_uri,
-                "code_challenge_method": code_challenge_method,
-                "code_challenge": code_challenge,
-                "scope": scope,
-                "client_id": client_id,
-                "response_type": response_type,
-                "audience": audience
-            })
-            google_scope = "openid email"
-            params = {
-                    "client_id": GOOGLE_CLIENT_ID,
-                    "redirect_uri": GOOGLE_REDIRECT_URI,
-                    "response_type": "code",
-                    "scope": google_scope,
-                    "state": server_state,
+            server_state = prepare_redirect_to_oauth_server(
+                {
+                    "state": state,
+                    "redirect_uri": redirect_uri,
+                    "code_challenge_method": code_challenge_method,
+                    "code_challenge": code_challenge,
+                    "scope": scope,
+                    "client_id": client_id,
+                    "response_type": response_type,
+                    "audience": audience,
                 }
+            )
+            open_id_scope = retrieve_open_id_scope(scope)
+            if "openid" not in open_id_scope.split(" "):
+                return redirect_with_error(
+                    redirect_uri,
+                    error="invalid_scope",
+                    error_description="The requested scope is invalid, unknown, or malformed.",
+                    state=state,
+                )
+            params = {
+                "client_id": GOOGLE_CLIENT_ID,
+                "redirect_uri": GOOGLE_REDIRECT_URI,
+                "response_type": "code",
+                "scope": open_id_scope,
+                "state": server_state,
+            }
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
         case "facebook":
             return "redirect to facebooks auth server"

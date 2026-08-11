@@ -1,6 +1,8 @@
 import re
 from urllib.parse import unquote, urlsplit
 
+from utility.constants import VALID_OPEN_ID_SCOPE
+
 # RFC 3986 unreserved + reserved characters, plus "%" for pct-encoded triples.
 _ALLOWED_URI_CHARS = re.compile(r"^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]*$")
 
@@ -29,8 +31,6 @@ def valid_redirect_uri(redirect_uri: str):
     if _INVALID_PERCENT_ENCODING.search(redirect_uri):
         return False
     
-    # Valid:   "https://example.com" -> returns True
-    # Invalid: "https://" or "/callback" or "invalid-url" -> returns False
     try:
         parsed = urlsplit(redirect_uri)
     except ValueError:
@@ -52,7 +52,8 @@ def valid_scope(scope: str, application_scope: list[str]):
         return False
 
     permissions = scope.split(" ")
-    allowed_scope = set(application_scope)
+    #Meta List of allowed scope excluding RBAC because were before authentication(RBAC will be a feature implementation at a later date)
+    allowed_scope = set(application_scope).union(VALID_OPEN_ID_SCOPE)
     for permission in permissions:
         if permission not in allowed_scope:
             return False

@@ -7,6 +7,7 @@ from services.tokens.authorization_code import (
     redeem_auth_code,
     valid_code_challenge,
 )
+from services.tokens.id_token import generate_id_token
 
 REQUIRED_PARAMS = [
     "code",
@@ -61,9 +62,11 @@ class OAuthToken(Resource):
             }, 400
 
         access_token = create_access_token(client_metadata)
-
-        return {
+        oauth_response = {
             "access_token": access_token,
             "token_type": "Bearer",
             "expires_in": ACCESS_TOKEN_TTL_SECONDS,
         }
+        if "openid" in client_metadata.get("scope"):
+            oauth_response["id_token"] = generate_id_token(client_metadata)
+        return oauth_response
