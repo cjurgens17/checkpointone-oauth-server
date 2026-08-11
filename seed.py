@@ -13,7 +13,7 @@ SEED_APPLICATION = [
         "client_secret": "bogus_client_secret_sldkfj234ks90df23lkjsdf092lksdffgj03jsdlkfgj",
         "name": "CheckPointOne",
         "redirect_uris": ["http://localhost:4200/callback"],
-        "scope": ["profile", "openid", "email"],
+        "scope": [],
     },
 ]
 
@@ -21,9 +21,10 @@ SEED_USER = [
     {
         "username": "test@checkpointone.com",
         "email": "test@checkpointone.com",
-        "sub": "cp1 | slkj234lksjdfl2",
+        "sub": "cp1|slkj234lksjdfl2",
         "connection": "Username-Password-Authentication",
-        "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
+        "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        "user_id": "cp1|slkj234lksjdfl2"
     }
 ]
 

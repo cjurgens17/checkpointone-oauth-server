@@ -20,14 +20,14 @@ def get_user_from_sub(sub: str):
         return session.scalars(stmt).first()
 
 
-def get_or_create_user_from_sub(sub: str, defaults: dict):
+def get_or_create_user_from_user_id(user_id: str, defaults: dict):
     with SessionLocal() as session:
-        stmt = select(User).where(User.sub == sub)
+        stmt = select(User).where(User.user_id == user_id)
         user = session.scalars(stmt).first()
         if user:
             return user
 
-        user = User(sub=sub, **defaults)
+        user = User(**defaults)
         session.add(user)
         session.commit()
         return user

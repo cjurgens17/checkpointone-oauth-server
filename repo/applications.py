@@ -30,3 +30,13 @@ def get_tenant_from_application(client_id: str):
             .where(Application.client_id == client_id)
         )
         return session.scalars(stmt).first()
+
+def get_scope_from_application(client_id: str):
+    if not client_id:
+        return None
+    with SessionLocal() as session:
+        stmt = (
+            select(Application.scope)
+            .where(Application.client_id == client_id)
+        )
+        return session.scalars(stmt).first()

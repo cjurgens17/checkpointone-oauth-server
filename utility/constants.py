@@ -1,0 +1,1 @@
+VALID_OPEN_ID_SCOPE = ["openid", "profile", "email", "address", "phone"]
