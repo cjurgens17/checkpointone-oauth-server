@@ -7,6 +7,7 @@ from resources.token import OAuthToken
 from seed import seed_database
 from views.authorize import authorize_bp
 from views.callbacks.google import google_callback_bp
+from views.jwks import jwks_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -16,6 +17,7 @@ api.add_resource(OAuthToken, "/oauth/token")
 
 app.register_blueprint(authorize_bp)
 app.register_blueprint(google_callback_bp)
+app.register_blueprint(jwks_bp)
 
 @app.get("/")
 def index():
