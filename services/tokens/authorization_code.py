@@ -35,7 +35,5 @@ def auth_code_expired(data):
 def valid_code_challenge(code_verifier, code_challenge_method, code_challenge):
     if not valid_code_challenge_method(code_challenge_method):
         return False
-    if code_challenge_method == "plain":
-        return code_verifier == code_challenge
     return hash_sha256(code_verifier) == code_challenge
 

@@ -27,12 +27,12 @@ class Token(Resource):
                 "error": "invalid_request",
                 "error_description": f"Missing required parameter(s): {', '.join(missing)}.",
             }, 400
-        #TODO
-            #If client secret is available then authenticate the client via a client credential grant before continuing.
-            #Verify Auth Code and not expired, Correct Client, and Redirect Uri
+        # TODO
+        # If client secret is available then authenticate the client via a client credential grant before continuing.
+        # Verify Auth Code and not expired, Correct Client, and Redirect Uri
 
         client_metadata = redeem_auth_code(body.get("code"))
-        
+
         if not client_metadata or auth_code_expired(client_metadata):
             return {
                 "error": "invalid_authorization",
@@ -49,18 +49,14 @@ class Token(Resource):
                 "error_description": "the provided redirect uri is missing or not supported",
             }, 400
 
-        if body.get("code_verifier") or body.get("code_challenge_method"):
-            if not (body.get("code_verifier") and body.get("code_challenge_method")):
-                return {
-                        "error": "invalid_request",
-                        "error_description": "missing required parameters to validate code challenge"
-                        }, 400
-            is_valid = valid_code_challenge(body.get("code_verifier"), body.get("code_challenge_method"), client_metadata.get("code_challenge"))
-            if not is_valid:
-                return {
-                        "error": "invalid_authorization",
-                        "error_description": "client has failed to recognize code challenge"
-                        }, 400
+        if body.get("code_verifier") and not valid_code_challenge(
+            body.get("code_verifier"),
+            client_metadata.get("code_challenge_method"),
+            client_metadata.get("code_challenge"),
+        ):
+            return {
+                "error": "invalid_request",
+                "error_description": "failed to identify correct code challenge",
+            }, 400
 
-        
         return "token"

@@ -59,7 +59,7 @@ def valid_scope(scope: str, application_scope: list[str]):
     return True
 
 def valid_code_challenge_method(method: str):
-    return method.lower() == "s256" or method.lower() == "plain"
+    return method.lower() == "s256"
 
 def valid_connection(connection: str):
     return connection in _VALID_CONNECTIONS
