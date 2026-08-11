@@ -17,7 +17,7 @@ REQUIRED_PARAMS = [
 ]
 
 
-class Token(Resource):
+class OAuthToken(Resource):
     def post(self):
         body = request.get_json(silent=True) or {}
         params = {name: body.get(name) for name in REQUIRED_PARAMS}
