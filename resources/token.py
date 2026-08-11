@@ -1,6 +1,7 @@
 from flask import request
 from flask_restful import Resource
 
+from services.tokens.access_token import ACCESS_TOKEN_TTL_SECONDS, create_access_token
 from services.tokens.authorization_code import (
     auth_code_expired,
     redeem_auth_code,
@@ -59,4 +60,10 @@ class Token(Resource):
                 "error_description": "failed to identify correct code challenge",
             }, 400
 
-        return "token"
+        access_token = create_access_token(client_metadata)
+
+        return {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": ACCESS_TOKEN_TTL_SECONDS,
+        }
