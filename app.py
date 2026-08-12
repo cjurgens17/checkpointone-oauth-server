@@ -10,7 +10,7 @@ from views.callbacks.google import google_callback_bp
 from views.jwks import jwks_bp
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 api = Api(app, catch_all_404s=True)
 
 api.add_resource(OAuthToken, "/oauth/token")
@@ -27,4 +27,4 @@ def index():
 if __name__ == "__main__":
     load_dotenv()
     seed_database()
-    app.run(host="0.0.0.0", debug=True, ssl_context="adhoc")
+    app.run(host="0.0.0.0", debug=True)
