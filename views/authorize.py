@@ -183,7 +183,7 @@ def authorize():
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
         case IdentityProvider.FACEBOOK:
             pass
-        case IdentityProvider.GIHUB:
+        case IdentityProvider.GITHUB:
             pass
         case _:
             return redirect_with_error(
