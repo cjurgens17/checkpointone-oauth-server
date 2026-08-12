@@ -44,18 +44,18 @@ def valid_redirect_uri(redirect_uri: str):
 def valid_response_type(response_type: str):
     return response_type.lower() in ["code", "token"]
 
-def valid_scope(scope: str, application_scope: list[str]):
+def valid_scope(scope: str, application_permissions: list[str]):
     if not scope:
         return False
 
     if not _VALID_SCOPE_FORMAT.match(scope):
         return False
 
-    permissions = scope.split(" ")
+    scope_permissions = scope.split(" ")
     #Meta List of allowed scope excluding RBAC because were before authentication(RBAC will be a feature implementation at a later date)
-    allowed_scope = set(application_scope).union(VALID_OPEN_ID_SCOPE)
-    for permission in permissions:
-        if permission not in allowed_scope:
+    allowed_permissions = set(application_permissions).union(VALID_OPEN_ID_SCOPE)
+    for permission in scope_permissions:
+        if permission not in allowed_permissions:
             return False
     return True
 

@@ -1,18 +1,24 @@
 from flask import request
 from flask_restful import Resource
 
-from services.tokens.access_token import ACCESS_TOKEN_TTL_SECONDS, create_access_token
+from repo.applications import get_application_from_client_id
+from services.tokens.access_token import (
+    ACCESS_TOKEN_TTL_SECONDS,
+    create_access_token,
+    create_confidential_client_access_token,
+)
 from services.tokens.authorization_code import (
     auth_code_expired,
     redeem_auth_code,
     valid_code_challenge,
 )
 from services.tokens.id_token import generate_id_token
+from utility.constants import ClientType, GrantType
+
+#Currently, Only supporting authorization_code and client_credentials grant_type
 
 REQUIRED_PARAMS = [
-    "code",
     "grant_type",
-    "redirect_uri",
     "client_id",
     "audience",
 ]
@@ -29,10 +35,50 @@ class OAuthToken(Resource):
                 "error": "invalid_request",
                 "error_description": f"Missing required parameter(s): {', '.join(missing)}.",
             }, 400
-        # TODO
-        # If client secret is available then authenticate the client via a client credential grant before continuing.
-        # Verify Auth Code and not expired, Correct Client, and Redirect Uri
+        
+        #Handle client_credentials grant_type
+        if GrantType.CONFIDENTIAL == body.get("grant_type"):
+            client = get_application_from_client_id(body.get("client_id"))
 
+            if not client:
+                return {
+                    "error": "invalid_request",
+                    "error_description": "requested client is not registered"
+                }, 400
+
+            if ClientType.WEB_APPLICATION != client.client_type:
+                return {
+                    "error": "client_unsupported",
+                    "error_description": "the client is not registered to perform a client_credentials grant type"
+                }, 400
+            if client.client_secret != body.get("client_secret"):
+                return {
+                    "error": "invalid_credentials",
+                    "error_description": "client credentials do not match"
+                }, 400
+            #Returning all granted permissions for now - IF SPECIFIC SCOPE IS ARGUED IT OVERRIDES THE GRANT ALL:***WILL IMPLEMENT***
+            confidential_client_metadata = {
+                "audience": body.get("audience"),
+                "client_id": client.client_id,
+            }
+            if client.permissions and len(client.permissions) > 0:
+                confidential_client_metadata["permissions"] = " ".join(client.permissions)
+            access_token = create_confidential_client_access_token(confidential_client_metadata)
+            oauth_response = {
+                "access_token": access_token,
+                "token_type": "Bearer",
+                "expires_in": ACCESS_TOKEN_TTL_SECONDS
+            }
+            return oauth_response
+            
+
+        #Handle authorization_code grant_type
+        if not body.get("code"):
+            return {
+                "error": "invalid_request",
+                "error_description": "missing required code parameter"
+            }, 400
+        
         client_metadata = redeem_auth_code(body.get("code"))
 
         if not client_metadata or auth_code_expired(client_metadata):
@@ -45,10 +91,16 @@ class OAuthToken(Resource):
                 "error": "invalid_client",
                 "error_description": "the requested client is incorrect or not authorized",
             }, 400
-        if client_metadata.get("redirect_uri") != body.get("redirect_uri"):
+        if client_metadata.get("redirect_uri") and client_metadata.get("redirect_uri") != body.get("redirect_uri"):
             return {
                 "error": "invalid_redirect",
-                "error_description": "the provided redirect uri is missing or not supported",
+                "error_description": "the provided redirect uri is not supported",
+            }, 400
+
+        if not body.get("code_verifier"):
+            return {
+                "error": "invalid_request",
+                "error_description": "invalid or missing code_verifier"
             }, 400
 
         if body.get("code_verifier") and not valid_code_challenge(

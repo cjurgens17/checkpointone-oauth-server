@@ -23,7 +23,7 @@ def _discovery_metadata():
         "token_endpoint": f"{ISSUER}/oauth/token",
         "jwks_uri": f"{ISSUER}/.well-known/jwks.json",
         "response_types_supported": ["code"],
-        "grant_types_supported": ["authorization_code"],
+        "grant_types_supported": ["authorization_code", "client_credentials"],
         "subject_types_supported": ["public"],
         "id_token_signing_alg_values_supported": ["RS256"],
         "scopes_supported": VALID_OPEN_ID_SCOPE,
