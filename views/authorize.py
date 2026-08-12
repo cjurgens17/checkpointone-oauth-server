@@ -14,6 +14,7 @@ from services.connections.google import (
 from services.connections.username_password_authentication import (
     authenticate_user_success,
 )
+from utility.constants import IdentityProvider
 from utility.helpers import build_encoded_url, retrieve_open_id_scope
 from utility.oauth_errors import redirect_with_error
 from utility.validation import (
@@ -111,9 +112,7 @@ def authorize():
     tenant = get_tenant_from_application(application.client_id)
     
     match(connection):
-        #Add OpenID providers as we expand
-        #Look Over RFC spec for secure implementation here
-        case "Username-Password-Authentication":
+        case IdentityProvider.NATIVE:
             username = request.form.get("username")
             password = request.form.get("password")
 
@@ -153,7 +152,7 @@ def authorize():
                 code_challenge=code_challenge,
                 code_challenge_method=code_challenge_method,
             )
-        case "google-oauth2":
+        case IdentityProvider.GOOGLE:
             server_state = prepare_redirect_to_oauth_server(
                 {
                     "state": state,
@@ -182,9 +181,14 @@ def authorize():
                 "state": server_state,
             }
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
-        case "facebook":
-            return "redirect to facebooks auth server"
-        case "github":
-            return "redirect to githubs auth server"
+        case IdentityProvider.FACEBOOK:
+            pass
+        case IdentityProvider.GIHUB:
+            pass
         case _:
-            return "Hello World"
+            return redirect_with_error(
+                redirect_uri,
+                error="invalid_authorization",
+                error_description="connection is not available",
+                state=state
+            )

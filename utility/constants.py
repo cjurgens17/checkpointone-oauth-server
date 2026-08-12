@@ -12,3 +12,10 @@ class ClientType:
     WEB_APPLICATION = "Web Application"
     USER_AGENT = "User Agent"
     NATIVE = "Native"
+
+class IdentityProvider(StrEnum):
+    NATIVE = "Username-Password-Authentication"
+    GOOGLE = "google-oauth2"
+    FACEBOOK = "facebook"
+    GIHUB = "github"
+
