@@ -27,4 +27,4 @@ def index():
 if __name__ == "__main__":
     load_dotenv()
     seed_database()
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=True, ssl_context="adhoc")

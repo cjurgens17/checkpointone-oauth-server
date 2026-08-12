@@ -2,7 +2,10 @@ import base64
 import os
 
 from cryptography.hazmat.primitives import hashes, serialization
+from dotenv import load_dotenv
 from jwt.algorithms import RSAAlgorithm
+
+load_dotenv()
 
 JWT_PRIVATE_KEY = os.getenv("JWT_PRIVATE_KEY", "").replace("\\n", "\n")
 
