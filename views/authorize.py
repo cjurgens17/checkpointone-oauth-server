@@ -92,6 +92,14 @@ def authorize():
             state=state
         )
 
+    if not code_challenge:
+        return redirect_with_error(
+            redirect_uri,
+            error="invalid_code_challenge",
+            error_description="code challenge not detected and is required",
+            state=state
+        )
+
     if not valid_connection(connection):
         return redirect_with_error(
             redirect_uri,
