@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, request
 
-from repo.applications import get_application_by_client_id
+from repo.applications import get_application_from_client_id
 from repo.user import get_or_create_user_from_user_id
 from services.connections.google import (
     exchange_code_for_id_token,
@@ -44,7 +44,7 @@ def google_callback():
 
     user_id = f"google-oauth2|{claims['sub']}"
 
-    application = get_application_by_client_id(resource_owner_request["client_id"])
+    application = get_application_from_client_id(resource_owner_request["client_id"])
     # Update defaults here to match claims from google -> solves downstream JIT provisioning -> After initial provision, the resource server is responsible for updating user claims
 
     get_or_create_user_from_user_id(

@@ -10,7 +10,7 @@ from views.callbacks.google import google_callback_bp
 from views.jwks import jwks_bp
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 api = Api(app, catch_all_404s=True)
 
 api.add_resource(OAuthToken, "/oauth/token")

@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, render_template, request
 
 from repo.applications import (
     allowed_redirect_uri,
-    get_application_by_client_id,
+    get_application_from_client_id,
     get_tenant_from_application,
 )
 from services.connections.google import (
@@ -39,7 +39,7 @@ def authorize():
     code_challenge_method = request.values.get("code_challenge_method")
     audience = request.values.get("audience")
 
-    application = get_application_by_client_id(client_id)
+    application = get_application_from_client_id(client_id)
 
     if not application:
         return render_template(
@@ -76,7 +76,7 @@ def authorize():
             state=state,
         )
 
-    if not valid_scope(scope, application.scope):
+    if not valid_scope(scope, application.permissions):
         return redirect_with_error(
             redirect_uri,
             error="invalid_scope",
@@ -89,6 +89,14 @@ def authorize():
             redirect_uri,
             error="invalid_code_challenge_method",
             error_description="The requested code challenge method is not supported.",
+            state=state
+        )
+
+    if not code_challenge:
+        return redirect_with_error(
+            redirect_uri,
+            error="invalid_code_challenge",
+            error_description="code challenge not detected and is required",
             state=state
         )
 

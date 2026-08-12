@@ -3,7 +3,7 @@ from models.application import Application
 from models.base import Base
 from models.tenant import Tenant
 from models.user import User
-from repo.applications import get_application_by_client_id
+from repo.applications import get_application_from_client_id
 from repo.tenants import get_tenant_by_slug
 from repo.user import get_user_from_email
 
@@ -11,10 +11,19 @@ SEED_APPLICATION = [
     {
         "client_id": "client_sdlkfj234kdjf2l34",
         "client_secret": "bogus_client_secret_sldkfj234ks90df23lkjsdf092lksdffgj03jsdlkfgj",
+        "client_type": "User Agent",
         "name": "CheckPointOne",
         "redirect_uris": ["http://localhost:4200/callback"],
-        "scope": [],
+        "permissions": [],
     },
+    {
+        "client_id": "client_confidential_sdfkj3l4kj",
+        "client_secret": "bogus_client_secret_sldkfj0987kjklkjlknlsdldldldldldldldl",
+        "client_type": "Web Application",
+        "name": "Brute Force",
+        "redirect_uris": [],
+        "permissions": ["king", "owned", "taken", "sudo", "root", "pwned", "1337"]
+    }
 ]
 
 SEED_USER = [
@@ -45,7 +54,7 @@ def seed_database():
                 # Force Insert to get id
                 session.flush()
         for application in SEED_APPLICATION:
-            if not get_application_by_client_id(application["client_id"]):
+            if not get_application_from_client_id(application["client_id"]):
                 session.add(Application(**application, tenant_id=tenant.id))
         for user in SEED_USER:
             if not get_user_from_email(user["email"]):
