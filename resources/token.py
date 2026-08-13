@@ -69,7 +69,7 @@ class OAuthToken(Resource):
                 "token_type": "Bearer",
                 "expires_in": ACCESS_TOKEN_TTL_SECONDS
             }
-            return oauth_response
+            return oauth_response, 200, {"Cache-Control": "no-store"}
             
 
         #Handle authorization_code grant_type
@@ -121,4 +121,4 @@ class OAuthToken(Resource):
         }
         if "openid" in client_metadata.get("scope"):
             oauth_response["id_token"] = generate_id_token(client_metadata)
-        return oauth_response
+        return oauth_response, 200, {"Cache-Control": "no-store"}

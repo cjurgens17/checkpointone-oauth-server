@@ -18,4 +18,11 @@ class IdentityProvider(StrEnum):
     GOOGLE = "google-oauth2"
     FACEBOOK = "facebook"
     GIHUB = "github"
+    CHECK_POINT_ONE = "cp1"
+
+class ScreenHint:
+    LOGIN = "login"
+    SIGNUP = "signup"
+
+SCREEN_HINTS = [ScreenHint.LOGIN, ScreenHint.SIGNUP]
 

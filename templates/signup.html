@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block body_class %}auth-background{% endblock %}
+
+{% block content %}
+  <div class="auth-card">
+    <img class="auth-logo" src="{{ tenant.logo_url or url_for('static', filename='assets/checkpointone-dragon.svg') }}" alt="{{ tenant.slug }}">
+
+    <h1 class="auth-heading">Sign Up</h1>
+    <p class="auth-subheading">to continue to <strong>{{ application.name }}</strong></p>
+
+    {% if error %}
+      <p class="auth-error">{{ error }}</p>
+    {% endif %}
+
+    <form class="auth-form" method="post" action="{{ url_for('authorize.authorize') }}">
+      <input type="hidden" name="response_type" value="{{ response_type or '' }}">
+      <input type="hidden" name="client_id" value="{{ client_id or '' }}">
+      <input type="hidden" name="redirect_uri" value="{{ redirect_uri or '' }}">
+      <input type="hidden" name="scope" value="{{ scope or '' }}">
+      <input type="hidden" name="state" value="{{ state or '' }}">
+      <input type="hidden" name="connection" value="{{ connection or '' }}">
+      <input type="hidden" name="code_challenge" value="{{ code_challenge or '' }}">
+      <input type="hidden" name="code_challenge_method" value="{{ code_challenge_method or '' }}">
+      <input type="hidden" name="audience" value="{{ audience or '' }}">
+      <input type="hidden" name="screen_hint" value="signup">
+
+      <label class="auth-label" for="email">Email address</label>
+      <input class="auth-input" type="email" id="email" name="email" value="{{ email or '' }}" required>
+
+      <label class="auth-label" for="password">Password</label>
+      <div class="auth-password-wrap">
+        <input class="auth-input" type="password" id="password" name="password" required minlength="{{ password_min_length or 8 }}">
+        <button class="auth-password-toggle" type="button" aria-label="Show password" aria-pressed="false">
+          <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 7 11 7a20.3 20.3 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <path d="M1 1l22 22"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="password-strength" id="password-strength" data-min-length="{{ password_min_length or 8 }}" aria-live="polite">
+        <div class="password-strength-bar">
+          <span class="password-strength-bar-fill" id="password-strength-fill"></span>
+        </div>
+        <ul class="password-strength-checklist">
+          <li class="password-strength-item" data-rule="length">At least {{ password_min_length or 8 }} characters</li>
+          <li class="password-strength-item" data-rule="upper">An uppercase letter</li>
+          <li class="password-strength-item" data-rule="digit">A number</li>
+          <li class="password-strength-item" data-rule="symbol">A symbol</li>
+        </ul>
+        <p class="password-strength-hint">At least 3 are required</p>
+      </div>
+
+      <label class="auth-label" for="confirm_password">Confirm password</label>
+      <div class="auth-password-wrap">
+        <input class="auth-input" type="password" id="confirm_password" name="confirm_password" required minlength="{{ password_min_length or 8 }}">
+        <button class="auth-password-toggle" type="button" aria-label="Show password" aria-pressed="false">
+          <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 7 11 7a20.3 20.3 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <path d="M1 1l22 22"/>
+          </svg>
+        </button>
+      </div>
+
+      <button class="auth-submit" type="submit">Continue</button>
+    </form>
+
+    <a class="auth-link" href="{{ url_for('authorize.authorize', response_type=response_type, client_id=client_id, redirect_uri=redirect_uri, scope=scope, state=state, connection=connection, code_challenge=code_challenge, code_challenge_method=code_challenge_method, audience=audience, screen_hint='login') }}">Already have an account? Log in</a>
+  </div>
+
+  <script>
+    (function () {
+      document.querySelectorAll(".auth-password-wrap").forEach((wrap) => {
+        const toggle = wrap.querySelector(".auth-password-toggle");
+        const input = wrap.querySelector(".auth-input");
+        if (!toggle || !input) return;
+
+        toggle.addEventListener("click", () => {
+          const isMasked = input.type === "password";
+          input.type = isMasked ? "text" : "password";
+          toggle.classList.toggle("is-visible", isMasked);
+          toggle.setAttribute("aria-pressed", String(isMasked));
+          toggle.setAttribute("aria-label", isMasked ? "Hide password" : "Show password");
+        });
+      });
+    })();
+
+    (function () {
+      const password = document.getElementById("password");
+      const strengthEl = document.getElementById("password-strength");
+      const fill = document.getElementById("password-strength-fill");
+      const items = document.querySelectorAll(".password-strength-item");
+      if (!password || !strengthEl || !fill || !items.length) return;
+
+      const minLength = parseInt(strengthEl.dataset.minLength, 10) || 8;
+      const rules = {
+        length: (value) => value.length >= minLength,
+        upper: (value) => /[A-Z]/.test(value),
+        digit: (value) => /\d/.test(value),
+        symbol: (value) => /[^A-Za-z0-9]/.test(value),
+      };
+
+      function update() {
+        const value = password.value;
+        let optionalMet = 0;
+
+        items.forEach((item) => {
+          const rule = rules[item.dataset.rule];
+          const met = rule ? rule(value) : false;
+          item.classList.toggle("is-met", met);
+          if (met && item.dataset.rule !== "length") optionalMet += 1;
+        });
+
+        const hasLength = rules.length(value);
+        let strength = 0;
+        if (value.length > 0) strength = 1;
+        if (hasLength) strength = 2;
+        if (hasLength && optionalMet >= 1) strength = 3;
+        if (hasLength && optionalMet >= 2) strength = 4;
+
+        fill.dataset.strength = strength;
+      }
+
+      password.addEventListener("input", update);
+      update();
+    })();
+  </script>
+{% endblock %}

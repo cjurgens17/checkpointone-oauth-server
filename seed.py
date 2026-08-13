@@ -1,3 +1,5 @@
+from werkzeug.security import generate_password_hash
+
 from database import SessionLocal, engine
 from models.application import Application
 from models.base import Base
@@ -6,6 +8,7 @@ from models.user import User
 from repo.applications import get_application_from_client_id
 from repo.tenants import get_tenant_by_slug
 from repo.user import get_user_from_email
+from utility.constants import IdentityProvider
 
 SEED_APPLICATION = [
     {
@@ -30,10 +33,10 @@ SEED_USER = [
     {
         "username": "test@checkpointone.com",
         "email": "test@checkpointone.com",
-        "sub": "cp1|slkj234lksjdfl2",
+        "sub": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2",
         "connection": "Username-Password-Authentication",
-        "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
-        "user_id": "cp1|slkj234lksjdfl2"
+        "password": generate_password_hash("Password123!"),
+        "user_id": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2"
     }
 ]
 
