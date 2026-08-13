@@ -10,6 +10,10 @@ A minimal, multi-tenant OAuth 2.0 authorization server
 
 ![Login screen](docs/screenshots/login.png)
 
+### Signup screen
+
+![Signup screen](docs/screenshots/signup.png)
+
 ## Getting started
 
 ```bash
