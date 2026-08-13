@@ -1,10 +1,12 @@
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, make_response, redirect, render_template, request
 
 from repo.applications import (
     allowed_redirect_uri,
     get_application_from_client_id,
     get_tenant_from_application,
 )
+from repo.session import get_session_from_session_id
+from repo.user import get_user_from_user_id
 from services.connections.google import (
     GOOGLE_AUTHORIZATION_ENDPOINT,
     GOOGLE_CLIENT_ID,
@@ -17,8 +19,15 @@ from services.connections.username_password_authentication import (
     register_user,
     user_claims,
 )
+from services.session import (
+    SESSION_COOKIE_NAME,
+    generate_server_session_cookie,
+    is_valid_session,
+    remove_session,
+)
 from services.tokens.authorization_code import create_auth_code
 from utility.constants import SCREEN_HINTS, IdentityProvider, ScreenHint
+from utility.errors import SessionUserNotFoundError
 from utility.helpers import build_encoded_url, retrieve_open_id_scope
 from utility.oauth_errors import redirect_with_error
 from utility.validation import (
@@ -39,12 +48,17 @@ def _issue_auth_code(oauth_params, user):
     auth_code = create_auth_code(
         {**oauth_params, "sub": user.sub, "provider_claims": user_claims(user)}
     )
-    return redirect(
+    response = redirect(
         build_encoded_url(
             oauth_params["redirect_uri"],
             {"state": oauth_params["state"], "code": auth_code},
         )
     )
+    session_cookie_name, session_id, cookie_options = generate_server_session_cookie(
+        user.user_id
+    )
+    response.set_cookie(session_cookie_name, session_id, **cookie_options)
+    return response
 
 
 @authorize_bp.route("/authorize", methods=["GET", "POST"])
@@ -89,7 +103,7 @@ def authorize():
             title="Authorization Error",
             redirect_uri=redirect_uri,
         ), 400
-    
+
     # RFC 6749 - https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1
     if not response_type or not valid_response_type(response_type):
         return redirect_with_error(
@@ -104,7 +118,7 @@ def authorize():
             redirect_uri,
             error="invalid_scope",
             error_description="The requested scope is invalid, unknown, or malformed.",
-            state=state
+            state=state,
         )
 
     if not valid_code_challenge_method(code_challenge_method):
@@ -112,7 +126,7 @@ def authorize():
             redirect_uri,
             error="invalid_code_challenge_method",
             error_description="The requested code challenge method is not supported.",
-            state=state
+            state=state,
         )
 
     if not code_challenge:
@@ -120,7 +134,7 @@ def authorize():
             redirect_uri,
             error="invalid_code_challenge",
             error_description="code challenge not detected and is required",
-            state=state
+            state=state,
         )
 
     if not valid_connection(connection):
@@ -128,80 +142,99 @@ def authorize():
             redirect_uri,
             error="invalid_connection",
             error_description="The connection is malformed or not supported",
-            state=state
+            state=state,
         )
 
     tenant = get_tenant_from_application(application.client_id)
-    
-    match(connection):
+
+    match connection:
         case IdentityProvider.NATIVE:
-            oauth_params = {
-                "response_type": response_type,
-                "client_id": client_id,
-                "redirect_uri": redirect_uri,
-                "scope": scope,
-                "state": state,
-                "code_challenge": code_challenge,
-                "code_challenge_method": code_challenge_method,
-                "audience": audience,
-            }
-            form_context = {
-                **oauth_params,
-                "application": application,
-                "tenant": tenant,
-                "connection": connection,
-                "password_min_length": MIN_PASSWORD_LENGTH,
-            }
+            try:
+                oauth_params = {
+                    "response_type": response_type,
+                    "client_id": client_id,
+                    "redirect_uri": redirect_uri,
+                    "scope": scope,
+                    "state": state,
+                    "code_challenge": code_challenge,
+                    "code_challenge_method": code_challenge_method,
+                    "audience": audience,
+                }
+                form_context = {
+                    **oauth_params,
+                    "application": application,
+                    "tenant": tenant,
+                    "connection": connection,
+                    "password_min_length": MIN_PASSWORD_LENGTH,
+                }
 
-            if request.method == "POST":
-                if screen_hint == ScreenHint.SIGNUP:
-                    email = request.form.get("email", "")
-                    password = request.form.get("password", "")
-                    confirm_password = request.form.get("confirm_password", "")
-
-                    error = None
-                    if not valid_email(email):
-                        error = "Enter a valid email address."
-                    elif not valid_password(password):
-                        error = (
-                            f"Password must be at least {MIN_PASSWORD_LENGTH} characters "
-                            "and include at least 2 of: a capital letter, a digit, a symbol."
-                        )
-                    elif password != confirm_password:
-                        error = "Passwords do not match."
-                    elif email_already_registered(email):
-                        error = "An account with this email already exists."
-
-                    if error:
-                        return render_template(
-                            "signup.html",
-                            title="Sign Up",
-                            **form_context,
-                            error=error,
-                            email=email,
-                        ), 400
-
-                    user = register_user(email, password, tenant.id)
+                # Check for Existing Session
+                if is_valid_session():
+                    session_id = request.cookies.get(SESSION_COOKIE_NAME)
+                    session = get_session_from_session_id(session_id)
+                    user = get_user_from_user_id(session.user_id)
+                    if not user:
+                        raise SessionUserNotFoundError(session_id)
                     return _issue_auth_code(oauth_params, user)
 
-                username = request.form.get("username", "")
-                password = request.form.get("password", "")
-                user = authenticate_user(username, password)
+                if request.method == "POST":
+                    if screen_hint == ScreenHint.SIGNUP:
+                        email = request.form.get("email", "")
+                        password = request.form.get("password", "")
+                        confirm_password = request.form.get("confirm_password", "")
 
-                if not user:
+                        error = None
+                        if not valid_email(email):
+                            error = "Enter a valid email address."
+                        elif not valid_password(password):
+                            error = (
+                                f"Password must be at least {MIN_PASSWORD_LENGTH} characters "
+                                "and include at least 2 of: a capital letter, a digit, a symbol."
+                            )
+                        elif password != confirm_password:
+                            error = "Passwords do not match."
+                        elif email_already_registered(email):
+                            error = "An account with this email already exists."
+
+                        if error:
+                            return render_template(
+                                "signup.html",
+                                title="Sign Up",
+                                **form_context,
+                                error=error,
+                                email=email,
+                            ), 400
+
+                        user = register_user(email, password, tenant.id)
+                        return _issue_auth_code(oauth_params, user)
+
+                    username = request.form.get("username", "")
+                    password = request.form.get("password", "")
+                    user = authenticate_user(username, password)
+
+                    if not user:
+                        return render_template(
+                            "login.html",
+                            title="Log In",
+                            **form_context,
+                            error="Incorrect username or password.",
+                            username=username,
+                        ), 401
+
+                    return _issue_auth_code(oauth_params, user)
+
+                if screen_hint == ScreenHint.SIGNUP:
                     return render_template(
-                        "login.html",
-                        title="Log In",
-                        **form_context,
-                        error="Incorrect username or password.",
-                        username=username,
-                    ), 401
-
-                return _issue_auth_code(oauth_params, user)
-
-            if screen_hint == ScreenHint.SIGNUP:
-                return render_template("signup.html", title="Sign Up", **form_context)
-            return render_template("login.html", title="Log In", **form_context)
+                        "signup.html", title="Sign Up", **form_context
+                    )
+                return render_template("login.html", title="Log In", **form_context)
+            except SessionUserNotFoundError:
+                remove_session(session_id)
+                response = make_response(
+                    render_template("login.html", title="Log In", **form_context)
+                )
+                response.delete_cookie(SESSION_COOKIE_NAME, path="/")
+                return response
         case IdentityProvider.GOOGLE:
             server_state = prepare_redirect_to_oauth_server(
                 {
@@ -240,5 +273,5 @@ def authorize():
                 redirect_uri,
                 error="invalid_authorization",
                 error_description="connection is not available",
-                state=state
+                state=state,
             )
