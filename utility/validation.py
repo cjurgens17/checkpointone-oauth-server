@@ -15,6 +15,15 @@ _CONTROL_CHARS = re.compile(r"[\x00-\x1f\x7f]")
 # Scope values must be single-space-separated words with no leading, trailing, or repeated whitespace.
 _VALID_SCOPE_FORMAT = re.compile(r"^\S+( \S+)*$")
 
+# Lightweight shape check (local-part@domain.tld) - not full RFC 5322 compliance.
+_VALID_EMAIL_FORMAT = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+MIN_PASSWORD_LENGTH = 8
+
+_PASSWORD_HAS_UPPER = re.compile(r"[A-Z]")
+_PASSWORD_HAS_DIGIT = re.compile(r"\d")
+_PASSWORD_HAS_SYMBOL = re.compile(r"[^A-Za-z0-9]")
+
 _VALID_CONNECTIONS = {"Username-Password-Authentication", "google-oauth2", "facebook", "github", "apple", "windowslive","sms", "email"}
 
 
@@ -64,3 +73,21 @@ def valid_code_challenge_method(method: str):
 
 def valid_connection(connection: str):
     return connection in _VALID_CONNECTIONS
+
+def valid_email(email: str):
+    if not email or not isinstance(email, str):
+        return False
+    return bool(_VALID_EMAIL_FORMAT.match(email))
+
+def valid_password(password: str):
+    if not password or not isinstance(password, str):
+        return False
+    if len(password) < MIN_PASSWORD_LENGTH:
+        return False
+
+    criteria_met = sum([
+        bool(_PASSWORD_HAS_UPPER.search(password)),
+        bool(_PASSWORD_HAS_DIGIT.search(password)),
+        bool(_PASSWORD_HAS_SYMBOL.search(password)),
+    ])
+    return criteria_met >= 2

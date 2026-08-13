@@ -12,20 +12,39 @@ from services.connections.google import (
     prepare_redirect_to_oauth_server,
 )
 from services.connections.username_password_authentication import (
-    authenticate_user_success,
+    authenticate_user,
+    email_already_registered,
+    register_user,
+    user_claims,
 )
-from utility.constants import IdentityProvider
+from services.tokens.authorization_code import create_auth_code
+from utility.constants import SCREEN_HINTS, IdentityProvider, ScreenHint
 from utility.helpers import build_encoded_url, retrieve_open_id_scope
 from utility.oauth_errors import redirect_with_error
 from utility.validation import (
+    MIN_PASSWORD_LENGTH,
     valid_code_challenge_method,
     valid_connection,
+    valid_email,
+    valid_password,
     valid_redirect_uri,
     valid_response_type,
     valid_scope,
 )
 
 authorize_bp = Blueprint("authorize", __name__)
+
+
+def _issue_auth_code(oauth_params, user):
+    auth_code = create_auth_code(
+        {**oauth_params, "sub": user.sub, "provider_claims": user_claims(user)}
+    )
+    return redirect(
+        build_encoded_url(
+            oauth_params["redirect_uri"],
+            {"state": oauth_params["state"], "code": auth_code},
+        )
+    )
 
 
 @authorize_bp.route("/authorize", methods=["GET", "POST"])
@@ -39,6 +58,9 @@ def authorize():
     code_challenge = request.values.get("code_challenge")
     code_challenge_method = request.values.get("code_challenge_method")
     audience = request.values.get("audience")
+    screen_hint = request.values.get("screen_hint", ScreenHint.LOGIN)
+    if screen_hint not in SCREEN_HINTS:
+        screen_hint = ScreenHint.LOGIN
 
     application = get_application_from_client_id(client_id)
 
@@ -113,45 +135,73 @@ def authorize():
     
     match(connection):
         case IdentityProvider.NATIVE:
-            username = request.form.get("username")
-            password = request.form.get("password")
+            oauth_params = {
+                "response_type": response_type,
+                "client_id": client_id,
+                "redirect_uri": redirect_uri,
+                "scope": scope,
+                "state": state,
+                "code_challenge": code_challenge,
+                "code_challenge_method": code_challenge_method,
+                "audience": audience,
+            }
+            form_context = {
+                **oauth_params,
+                "application": application,
+                "tenant": tenant,
+                "connection": connection,
+                "password_min_length": MIN_PASSWORD_LENGTH,
+            }
 
             if request.method == "POST":
-                if authenticate_user_success(username, password):
-                    #Create + store authorization code, redirect resource owner back to redirect_uri with state + code.
-                    return f"Authenticated as {username}"
+                if screen_hint == ScreenHint.SIGNUP:
+                    email = request.form.get("email", "")
+                    password = request.form.get("password", "")
+                    confirm_password = request.form.get("confirm_password", "")
 
-                return render_template(
-                    "login.html",
-                    title="Log In",
-                    application=application,
-                    tenant=tenant,
-                    response_type=response_type,
-                    client_id=client_id,
-                    redirect_uri=redirect_uri,
-                    scope=scope,
-                    state=state,
-                    connection=connection,
-                    code_challenge=code_challenge,
-                    code_challenge_method=code_challenge_method,
-                    error="Incorrect username or password.",
-                    username=username,
-                ), 401
+                    error = None
+                    if not valid_email(email):
+                        error = "Enter a valid email address."
+                    elif not valid_password(password):
+                        error = (
+                            f"Password must be at least {MIN_PASSWORD_LENGTH} characters "
+                            "and include at least 2 of: a capital letter, a digit, a symbol."
+                        )
+                    elif password != confirm_password:
+                        error = "Passwords do not match."
+                    elif email_already_registered(email):
+                        error = "An account with this email already exists."
 
-            return render_template(
-                "login.html",
-                title="Log In",
-                application=application,
-                tenant=tenant,
-                response_type=response_type,
-                client_id=client_id,
-                redirect_uri=redirect_uri,
-                scope=scope,
-                state=state,
-                connection=connection,
-                code_challenge=code_challenge,
-                code_challenge_method=code_challenge_method,
-            )
+                    if error:
+                        return render_template(
+                            "signup.html",
+                            title="Sign Up",
+                            **form_context,
+                            error=error,
+                            email=email,
+                        ), 400
+
+                    user = register_user(email, password, tenant.id)
+                    return _issue_auth_code(oauth_params, user)
+
+                username = request.form.get("username", "")
+                password = request.form.get("password", "")
+                user = authenticate_user(username, password)
+
+                if not user:
+                    return render_template(
+                        "login.html",
+                        title="Log In",
+                        **form_context,
+                        error="Incorrect username or password.",
+                        username=username,
+                    ), 401
+
+                return _issue_auth_code(oauth_params, user)
+
+            if screen_hint == ScreenHint.SIGNUP:
+                return render_template("signup.html", title="Sign Up", **form_context)
+            return render_template("login.html", title="Log In", **form_context)
         case IdentityProvider.GOOGLE:
             server_state = prepare_redirect_to_oauth_server(
                 {

@@ -264,13 +264,119 @@ code {
 }
 
 .auth-link {
-  display: inline-block;
-  margin-top: 1.25rem;
+  display: block;
+  margin-top: 0.75rem;
   font-size: 0.85rem;
   color: #2f6fed;
   text-decoration: none;
 }
 
+.auth-link:first-of-type {
+  margin-top: 1.25rem;
+}
+
 .auth-link:hover {
   text-decoration: underline;
+}
+
+.password-strength {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.password-strength-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #e3e8f5;
+  overflow: hidden;
+}
+
+.password-strength-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: #d6453f;
+  border-radius: 2px;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.password-strength-bar-fill[data-strength="1"] {
+  width: 25%;
+  background: #d6453f;
+}
+
+.password-strength-bar-fill[data-strength="2"] {
+  width: 50%;
+  background: #e0a52f;
+}
+
+.password-strength-bar-fill[data-strength="3"] {
+  width: 75%;
+  background: #e0a52f;
+}
+
+.password-strength-bar-fill[data-strength="4"] {
+  width: 100%;
+  background: #2e9e5b;
+}
+
+.password-strength-checklist {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.password-strength-item {
+  position: relative;
+  padding-left: 1.3rem;
+  font-size: 0.78rem;
+  color: #5b6b8c;
+}
+
+.password-strength-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1.5px solid #c7d2e8;
+  background: #fff;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.password-strength-item::after {
+  content: "\2713";
+  position: absolute;
+  left: 2.5px;
+  top: 50%;
+  transform: translateY(-58%);
+  font-size: 10px;
+  line-height: 1;
+  color: transparent;
+  transition: color 0.15s ease;
+}
+
+.password-strength-item.is-met {
+  color: #16224a;
+}
+
+.password-strength-item.is-met::before {
+  border-color: #2e9e5b;
+  background: #2e9e5b;
+}
+
+.password-strength-item.is-met::after {
+  color: #fff;
+}
+
+.password-strength-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #8592ad;
 }
