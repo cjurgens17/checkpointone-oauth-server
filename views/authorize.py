@@ -21,9 +21,9 @@ from services.connections.username_password_authentication import (
 )
 from services.session import (
     SESSION_COOKIE_NAME,
+    end_session,
     generate_server_session_cookie,
     is_valid_session,
-    remove_session,
 )
 from services.tokens.authorization_code import create_auth_code
 from utility.constants import SCREEN_HINTS, IdentityProvider, ScreenHint
@@ -229,12 +229,10 @@ def authorize():
                     )
                 return render_template("login.html", title="Log In", **form_context)
             except SessionUserNotFoundError:
-                remove_session(session_id)
                 response = make_response(
                     render_template("login.html", title="Log In", **form_context)
                 )
-                response.delete_cookie(SESSION_COOKIE_NAME, path="/")
-                return response
+                return end_session(response, session_id)
         case IdentityProvider.GOOGLE:
             server_state = prepare_redirect_to_oauth_server(
                 {

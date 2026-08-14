@@ -21,6 +21,7 @@ def _discovery_metadata():
         "issuer": ISSUER,
         "authorization_endpoint": f"{ISSUER}/authorize",
         "token_endpoint": f"{ISSUER}/oauth/token",
+        "end_session_endpoint": f"{ISSUER}/logout",
         "jwks_uri": f"{ISSUER}/.well-known/jwks.json",
         "response_types_supported": ["code"],
         "grant_types_supported": ["authorization_code", "client_credentials"],

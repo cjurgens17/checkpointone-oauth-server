@@ -22,6 +22,7 @@ class Application(Base):
     client_secret: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(255))
     redirect_uris: Mapped[list[str]] = mapped_column(ARRAY(String))
+    logout_uris: Mapped[list[str]] = mapped_column(ARRAY(String))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     permissions: Mapped[list[str]] = mapped_column(ARRAY(String(30)))
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenant.id"))

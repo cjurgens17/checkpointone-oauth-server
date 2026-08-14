@@ -44,3 +44,9 @@ def is_valid_session():
 
 def remove_session(session_id):
     delete_session(session_id)
+
+def end_session(response, session_id):
+    if session_id:
+        remove_session(session_id)
+    response.delete_cookie(SESSION_COOKIE_NAME, path="/")
+    return response

@@ -4,7 +4,7 @@
 
 {% block content %}
   <div class="auth-card">
-    <img class="auth-logo" src="{{ tenant.logo_url or url_for('static', filename='assets/checkpointone-dragon.svg') }}" alt="{{ tenant.slug }}">
+    <img class="auth-logo" src="{{ tenant.logo_url or url_for('static', filename='assets/checkpointone_logo.svg') }}" alt="{{ tenant.slug }}">
 
     <h1 class="auth-heading">Log In</h1>
     <p class="auth-subheading">to continue to <strong>{{ application.name }}</strong></p>

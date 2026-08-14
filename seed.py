@@ -17,6 +17,7 @@ SEED_APPLICATION = [
         "client_type": "User Agent",
         "name": "CheckPointOne",
         "redirect_uris": ["http://localhost:4200/callback"],
+        "logout_uris": ["http://localhost:4200/logout"],
         "permissions": [],
     },
     {
@@ -25,6 +26,7 @@ SEED_APPLICATION = [
         "client_type": "Web Application",
         "name": "Brute Force",
         "redirect_uris": [],
+        "logout_uris": [],
         "permissions": ["king", "owned", "taken", "sudo", "root", "pwned", "1337"]
     }
 ]
