@@ -45,7 +45,7 @@ def generate_id_token(client_metadata):
 
     payload = {
         "iss": ISSUER,
-        "aud": client_metadata.get("audience"),
+        "aud": client_metadata.get("client_id"),
         "sub": client_metadata.get("sub"),
         "iat": issued_at,
         "exp": issued_at + ID_TOKEN_TTL_SECONDS,
