@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>Missing id_token_hint</h1>
+    <p>This logout request is missing the required <code>id_token_hint</code> parameter.</p>
+    <p class="error-detail">
+      If you're the developer of the application that sent you here, include the
+      <code>id_token</code> issued to the user as the <code>id_token_hint</code>
+      parameter.
+    </p>
+  </div>
+{% endblock %}

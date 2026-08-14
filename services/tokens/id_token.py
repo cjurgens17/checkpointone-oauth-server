@@ -3,7 +3,7 @@ import time
 
 import jwt
 
-from utility.jwt_keys import JWT_KEY_ID, JWT_PRIVATE_KEY
+from utility.jwt_keys import JWT_KEY_ID, JWT_PRIVATE_KEY, JWT_PUBLIC_KEY
 
 # REQUIRED CLAIMS: iss, exp, iat, aud, sub
 
@@ -57,6 +57,17 @@ def generate_id_token(client_metadata):
     payload = merge_provider_claims(scope, payload, provider_claims)
 
     return jwt.encode(payload, JWT_PRIVATE_KEY, algorithm="RS256", headers={"kid": JWT_KEY_ID})
+
+
+def verify_id_token_on_logout(id_token: str) -> dict:
+    #Raises jwt.InvalidTokenError if decoding fails
+    return jwt.decode(
+        id_token,
+        JWT_PUBLIC_KEY,
+        algorithms=["RS256"],
+        issuer=ISSUER,
+        options={"verify_aud": False, "verify_exp": False},
+    )
 
 
 def merge_provider_claims(scope: list[str], curr_claims, provider_claims):
