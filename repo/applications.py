@@ -20,6 +20,13 @@ def allowed_redirect_uri(redirect_uri: str, client_id: str) -> bool:
     return redirect_uri in application.redirect_uris
 
 
+def allowed_logout_uri(logout_uri: str, client_id: str) -> bool:
+    application = get_application_from_client_id(client_id)
+    if application is None:
+        return False
+    return logout_uri in application.logout_uris
+
+
 def get_tenant_from_application(client_id: str):
     if not client_id:
         return None

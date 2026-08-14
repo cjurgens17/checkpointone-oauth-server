@@ -20,7 +20,7 @@ def generate_state():
     length = secrets.choice(range(STATE_MIN_LENGTH, STATE_MAX_LENGTH + 1))
     return "".join(secrets.choice(STATE_ALPHABET) for _ in range(length))
 
-def build_encoded_url(url, params):
+def build_encoded_url(url, params=""):
     return f"{url}?{urlencode(params)}"
 
 def retrieve_open_id_scope(scope):
