@@ -272,13 +272,6 @@ def authorize():
                 }
             )
             open_id_scope = retrieve_open_id_scope(scope)
-            if "openid" not in open_id_scope.split(" "):
-                return redirect_with_error(
-                    redirect_uri,
-                    error="invalid_scope",
-                    error_description="The requested scope is invalid, unknown, or malformed.",
-                    state=state,
-                )
             params = {
                 "client_id": GOOGLE_CLIENT_ID,
                 "redirect_uri": GOOGLE_REDIRECT_URI,

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import ForeignKey, String
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models.base import Base
@@ -17,6 +18,6 @@ class Session(Base):
     response_type: Mapped[str] = mapped_column(String(16), nullable=False)
     scope: Mapped[str] = mapped_column(String(1200), nullable=False)
     connection: Mapped[str] = mapped_column(String(64), nullable=False)
-    audience: Mapped[str] = mapped_column(String(255), nullable=True)
+    audience: Mapped[list[str]] = mapped_column(ARRAY(String(255)), nullable=True)
     
     

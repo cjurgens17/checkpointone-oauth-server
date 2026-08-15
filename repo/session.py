@@ -14,19 +14,29 @@ def generate_session_id():
 def generate_session_expiration(ttl):
     return datetime.now(timezone.utc) + timedelta(seconds=ttl)
 
-#Performs an upsert on the user_id
 def create_session(user_id, ttl, client_id, response_type, scope, connection, audience=None):
-    session_metadata = {
-        "session_id": generate_session_id(),
-        "user_id": user_id,
-        "expires_at": generate_session_expiration(ttl),
-        "client_id": client_id,
-        "response_type": response_type,
-        "scope": scope,
-        "connection": connection,
-        "audience": audience,
-    }
     with SessionLocal() as session:
+        existing = session.scalars(
+            select(Session).where(Session.user_id == user_id)
+        ).first()
+
+        if existing and existing.client_id == client_id:
+            audiences = list(existing.audience or [])
+            if audience and audience not in audiences:
+                audiences.append(audience)
+        else:
+            audiences = [audience] if audience else []
+
+        session_metadata = {
+            "session_id": generate_session_id(),
+            "user_id": user_id,
+            "expires_at": generate_session_expiration(ttl),
+            "client_id": client_id,
+            "response_type": response_type,
+            "scope": scope,
+            "connection": connection,
+            "audience": audiences,
+        }
         stmt = insert(Session).values(**session_metadata)
         stmt = stmt.on_conflict_do_update(
             index_elements=[Session.user_id],
@@ -59,9 +69,3 @@ def delete_session(session_id):
             return
         session.delete(session_row)
         session.commit()
-
-def get_scope_from_session(session_id):
-    with SessionLocal() as session:
-        stmt = select(Session.scope).where(Session.session_id == session_id)
-        return session.scalars(stmt).first()
-        

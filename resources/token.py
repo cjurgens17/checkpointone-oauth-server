@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 
 from repo.applications import get_application_from_client_id
-from repo.session import get_scope_from_session, get_session_from_session_id
+from repo.session import get_session_from_session_id
 from services.session import SESSION_COOKIE_NAME, is_valid_session
 from services.tokens.access_token import (
     ACCESS_TOKEN_TTL_SECONDS,
@@ -114,16 +114,22 @@ class OAuthToken(Resource):
                 "error": "invalid_request",
                 "error_description": "failed to identify correct code challenge",
             }, 400
-        #Return Same scope tied to session if the session exists already - Up to Developer to authorize with prompt=login to requst new authorization outside of current session scope.
+        #Return same scope tied to session if the session exists already - Up to Developer to authorize with prompt=login to requst new authorization outside of current session scope.
         if is_valid_session():
             session = get_session_from_session_id(request.cookies.get(SESSION_COOKIE_NAME))
-            client_metadata["scope"] = get_scope_from_session(session.session_id)
+            session_audiences = session.audience or []
+            if session.client_id != client_metadata.get("client_id") or client_metadata.get("audience") not in session_audiences:
+                return {
+                    "error": "invalid_grant",
+                    "error_description": "the active session is not associated with the requested client_id and audience",
+                }, 400
+            client_metadata["scope"] = session.scope
         access_token = create_access_token(client_metadata)
         oauth_response = {
             "access_token": access_token,
             "token_type": "Bearer",
             "expires_in": ACCESS_TOKEN_TTL_SECONDS,
         }
-        if "openid" in client_metadata.get("scope"):
+        if "openid" in client_metadata.get("scope", "").split(" "):
             oauth_response["id_token"] = generate_id_token(client_metadata)
         return oauth_response, 200, {"Cache-Control": "no-store"}
