@@ -291,6 +291,8 @@ def authorize():
             pass
         case IdentityProvider.GITHUB:
             pass
+        case IdentityProvider.MICROSOFT:
+            pass
         case _:
             return redirect_with_error(
                 redirect_uri,
