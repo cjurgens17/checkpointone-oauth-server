@@ -36,6 +36,7 @@ from utility.validation import (
     valid_connection,
     valid_email,
     valid_password,
+    valid_prompt,
     valid_redirect_uri,
     valid_response_type,
     valid_scope,
@@ -148,6 +149,14 @@ def authorize():
             redirect_uri,
             error="invalid_connection",
             error_description="The connection is malformed or not supported",
+            state=state,
+        )
+
+    if not valid_prompt(prompt, connection):
+        return redirect_with_error(
+            redirect_uri,
+            error="invalid_prompt",
+            error_description="The requested prompt is invalid or not supported for this connection.",
             state=state,
         )
 
@@ -281,11 +290,7 @@ def authorize():
                 "scope": open_id_scope,
                 "state": server_state,
             }
-            #Google Allows none, consent, and select_account
-            if prompt and prompt != "login":
-                params["prompt"] = prompt
-            elif not prompt:
-                params["prompt"] = "select_account"
+            params["prompt"] = prompt if prompt else Prompt.SELECT_ACCOUNT
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
         case IdentityProvider.FACEBOOK:
             pass

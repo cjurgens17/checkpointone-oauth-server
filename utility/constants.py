@@ -33,3 +33,6 @@ class Prompt:
     CONSENT = "consent"
     SELECT_ACCOUNT = "select_account"
 
+NATIVE_PROMPTS = [Prompt.NONE, Prompt.LOGIN, Prompt.SELECT_ACCOUNT, Prompt.CONSENT]
+GOOGLE_PROMPTS = [Prompt.CONSENT, Prompt.NONE, Prompt.SELECT_ACCOUNT]
+
