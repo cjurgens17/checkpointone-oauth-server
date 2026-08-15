@@ -2,6 +2,8 @@ from flask import request
 from flask_restful import Resource
 
 from repo.applications import get_application_from_client_id
+from repo.session import get_scope_from_session, get_session_from_session_id
+from services.session import SESSION_COOKIE_NAME, is_valid_session
 from services.tokens.access_token import (
     ACCESS_TOKEN_TTL_SECONDS,
     create_access_token,
@@ -112,7 +114,10 @@ class OAuthToken(Resource):
                 "error": "invalid_request",
                 "error_description": "failed to identify correct code challenge",
             }, 400
-
+        #Return Same scope tied to session if the session exists already - Up to Developer to authorize with prompt=login to requst new authorization outside of current session scope.
+        if is_valid_session():
+            session = get_session_from_session_id(request.cookies.get(SESSION_COOKIE_NAME))
+            client_metadata["scope"] = get_scope_from_session(session.session_id)
         access_token = create_access_token(client_metadata)
         oauth_response = {
             "access_token": access_token,

@@ -59,4 +59,9 @@ def delete_session(session_id):
             return
         session.delete(session_row)
         session.commit()
+
+def get_scope_from_session(session_id):
+    with SessionLocal() as session:
+        stmt = select(Session.scope).where(Session.session_id == session_id)
+        return session.scalars(stmt).first()
         

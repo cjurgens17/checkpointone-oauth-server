@@ -15,7 +15,7 @@ class Session(Base):
     expires_at: Mapped[datetime] = mapped_column(nullable=False)
     client_id: Mapped[str] = mapped_column(String(64), ForeignKey("applications.client_id"), nullable=False)
     response_type: Mapped[str] = mapped_column(String(16), nullable=False)
-    scope: Mapped[str] = mapped_column(String(255), nullable=False)
+    scope: Mapped[str] = mapped_column(String(1200), nullable=False)
     connection: Mapped[str] = mapped_column(String(64), nullable=False)
     audience: Mapped[str] = mapped_column(String(255), nullable=True)
     
