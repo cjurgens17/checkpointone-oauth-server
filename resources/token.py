@@ -117,8 +117,7 @@ class OAuthToken(Resource):
         #Return same scope tied to session if the session exists already - Up to Developer to authorize with prompt=login to requst new authorization outside of current session scope.
         if is_valid_session():
             session = get_session_from_session_id(request.cookies.get(SESSION_COOKIE_NAME))
-            session_audiences = session.audience or []
-            if session.client_id != client_metadata.get("client_id") or client_metadata.get("audience") not in session_audiences:
+            if session.client_id != client_metadata.get("client_id") or session.audience != body.get("audience"):
                 return {
                     "error": "invalid_grant",
                     "error_description": "the active session is not associated with the requested client_id and audience",
