@@ -26,7 +26,7 @@ from services.session import (
     is_valid_session,
 )
 from services.tokens.authorization_code import create_auth_code
-from utility.constants import SCREEN_HINTS, IdentityProvider, ScreenHint
+from utility.constants import SCREEN_HINTS, IdentityProvider, Prompt, ScreenHint
 from utility.errors import SessionUserNotFoundError
 from utility.helpers import build_encoded_url, retrieve_open_id_scope
 from utility.oauth_errors import redirect_with_error
@@ -44,7 +44,7 @@ from utility.validation import (
 authorize_bp = Blueprint("authorize", __name__)
 
 
-def _issue_auth_code(oauth_params, user):
+def _issue_auth_code(oauth_params, user, connection):
     auth_code = create_auth_code(
         {**oauth_params, "sub": user.sub, "provider_claims": user_claims(user)}
     )
@@ -55,7 +55,12 @@ def _issue_auth_code(oauth_params, user):
         )
     )
     session_cookie_name, session_id, cookie_options = generate_server_session_cookie(
-        user.user_id
+        user.user_id,
+        client_id=oauth_params["client_id"],
+        response_type=oauth_params["response_type"],
+        scope=oauth_params["scope"],
+        connection=connection,
+        audience=oauth_params["audience"],
     )
     response.set_cookie(session_cookie_name, session_id, **cookie_options)
     return response
@@ -73,6 +78,7 @@ def authorize():
     code_challenge_method = request.values.get("code_challenge_method")
     audience = request.values.get("audience")
     screen_hint = request.values.get("screen_hint", ScreenHint.LOGIN)
+    prompt = request.values.get("prompt")
     if screen_hint not in SCREEN_HINTS:
         screen_hint = ScreenHint.LOGIN
 
@@ -159,6 +165,7 @@ def authorize():
                     "code_challenge": code_challenge,
                     "code_challenge_method": code_challenge_method,
                     "audience": audience,
+                    "prompt": prompt
                 }
                 form_context = {
                     **oauth_params,
@@ -168,17 +175,10 @@ def authorize():
                     "password_min_length": MIN_PASSWORD_LENGTH,
                 }
 
-                # Check for Existing Session
-                if is_valid_session():
-                    session_id = request.cookies.get(SESSION_COOKIE_NAME)
-                    session = get_session_from_session_id(session_id)
-                    user = get_user_from_user_id(session.user_id)
-                    if not user:
-                        raise SessionUserNotFoundError(session_id)
-                    return _issue_auth_code(oauth_params, user)
-
-                if request.method == "POST":
-                    if screen_hint == ScreenHint.SIGNUP:
+                # screen_hint decides which template/flow applies; signup never
+                # consults the existing session since it's always a fresh account.
+                if screen_hint == ScreenHint.SIGNUP:
+                    if request.method == "POST":
                         email = request.form.get("email", "")
                         password = request.form.get("password", "")
                         confirm_password = request.form.get("confirm_password", "")
@@ -206,8 +206,21 @@ def authorize():
                             ), 400
 
                         user = register_user(email, password, tenant.id)
-                        return _issue_auth_code(oauth_params, user)
+                        return _issue_auth_code(oauth_params, user, connection)
 
+                    return render_template(
+                        "signup.html", title="Sign Up", **form_context
+                    )
+
+                if prompt != Prompt.LOGIN and is_valid_session():
+                    session_id = request.cookies.get(SESSION_COOKIE_NAME)
+                    session = get_session_from_session_id(session_id)
+                    user = get_user_from_user_id(session.user_id)
+                    if not user:
+                        raise SessionUserNotFoundError(session_id)
+                    return _issue_auth_code(oauth_params, user, connection)
+
+                if request.method == "POST":
                     username = request.form.get("username", "")
                     password = request.form.get("password", "")
                     user = authenticate_user(username, password)
@@ -221,12 +234,8 @@ def authorize():
                             username=username,
                         ), 401
 
-                    return _issue_auth_code(oauth_params, user)
+                    return _issue_auth_code(oauth_params, user, connection)
 
-                if screen_hint == ScreenHint.SIGNUP:
-                    return render_template(
-                        "signup.html", title="Sign Up", **form_context
-                    )
                 return render_template("login.html", title="Log In", **form_context)
             except SessionUserNotFoundError:
                 response = make_response(
@@ -234,6 +243,23 @@ def authorize():
                 )
                 return end_session(response, session_id)
         case IdentityProvider.GOOGLE:
+            if prompt != Prompt.LOGIN and is_valid_session():
+                session_id = request.cookies.get(SESSION_COOKIE_NAME)
+                session = get_session_from_session_id(session_id)
+                user = get_user_from_user_id(session.user_id)
+                if user:
+                    oauth_params = {
+                        "response_type": response_type,
+                        "client_id": client_id,
+                        "redirect_uri": redirect_uri,
+                        "scope": scope,
+                        "state": state,
+                        "code_challenge": code_challenge,
+                        "code_challenge_method": code_challenge_method,
+                        "audience": audience,
+                    }
+                    return _issue_auth_code(oauth_params, user, connection)
+
             server_state = prepare_redirect_to_oauth_server(
                 {
                     "state": state,
@@ -244,16 +270,10 @@ def authorize():
                     "client_id": client_id,
                     "response_type": response_type,
                     "audience": audience,
+                    "prompt": prompt
                 }
             )
             open_id_scope = retrieve_open_id_scope(scope)
-            if "openid" not in open_id_scope.split(" "):
-                return redirect_with_error(
-                    redirect_uri,
-                    error="invalid_scope",
-                    error_description="The requested scope is invalid, unknown, or malformed.",
-                    state=state,
-                )
             params = {
                 "client_id": GOOGLE_CLIENT_ID,
                 "redirect_uri": GOOGLE_REDIRECT_URI,
@@ -261,10 +281,17 @@ def authorize():
                 "scope": open_id_scope,
                 "state": server_state,
             }
+            #Google Allows none, consent, and select_account
+            if prompt and prompt != "login":
+                params["prompt"] = prompt
+            elif not prompt:
+                params["prompt"] = "select_account"
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
         case IdentityProvider.FACEBOOK:
             pass
         case IdentityProvider.GITHUB:
+            pass
+        case IdentityProvider.MICROSOFT:
             pass
         case _:
             return redirect_with_error(

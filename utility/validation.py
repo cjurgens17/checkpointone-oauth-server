@@ -61,12 +61,15 @@ def valid_scope(scope: str, application_permissions: list[str]):
         return False
 
     scope_permissions = scope.split(" ")
-    #Meta List of allowed scope excluding RBAC because were before authentication(RBAC will be a feature implementation at a later date)
-    allowed_permissions = set(application_permissions).union(VALID_OPEN_ID_SCOPE)
-    for permission in scope_permissions:
-        if permission not in allowed_permissions:
-            return False
-    return True
+    openid_scopes = {permission for permission in scope_permissions if permission in VALID_OPEN_ID_SCOPE}
+    app_scopes = [permission for permission in scope_permissions if permission not in VALID_OPEN_ID_SCOPE]
+
+    if "openid" not in openid_scopes:
+        return False
+
+    #RBAC is not implemented yet(will be a feature implementation at a later date), so app_scopes
+    app_permissions = set(application_permissions)
+    return all(permission in app_permissions for permission in app_scopes)
 
 def valid_code_challenge_method(method: str):
     return method.lower() == "s256"

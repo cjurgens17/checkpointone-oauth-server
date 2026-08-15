@@ -19,10 +19,17 @@ class IdentityProvider(StrEnum):
     FACEBOOK = "facebook"
     GIHUB = "github"
     CHECK_POINT_ONE = "cp1"
+    MICROSOFT = "microsoft-oidc"
 
 class ScreenHint:
     LOGIN = "login"
     SIGNUP = "signup"
 
 SCREEN_HINTS = [ScreenHint.LOGIN, ScreenHint.SIGNUP]
+
+class Prompt:
+    LOGIN = "login"
+    NONE = "none"
+    CONSENT = "consent"
+    SELECT_ACCOUNT = "select_account"
 

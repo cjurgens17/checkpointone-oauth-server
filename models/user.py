@@ -16,7 +16,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(255))
-    email: Mapped[str] = mapped_column(String(255), index=True)
+    email: Mapped[str] = mapped_column(String(255), index=True, unique=True)
     email_verified: Mapped[bool] = mapped_column(nullable=True)
     name: Mapped[str] = mapped_column(String(255), nullable=True)
     family_name: Mapped[str] = mapped_column(String(255), nullable=True)

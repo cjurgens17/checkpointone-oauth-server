@@ -10,9 +10,11 @@ SESSION_TTL_SECONDS = 60 * 60 * 24
 IS_LOCAL_ENV = os.getenv("env", "production") == "local"
 
 
-def generate_server_session_cookie(user_id, ttl=SESSION_TTL_SECONDS):
+def generate_server_session_cookie(
+    user_id, client_id, response_type, scope, connection, audience=None, ttl=SESSION_TTL_SECONDS
+):
 
-    session = create_session(user_id, ttl)
+    session = create_session(user_id, ttl, client_id, response_type, scope, connection, audience)
 
     cookie_options = {
         "max_age": ttl,

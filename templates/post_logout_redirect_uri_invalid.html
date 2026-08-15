@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>Invalid post_logout_redirect_uri</h1>
+    <p>The <code>post_logout_redirect_uri</code> provided is malformed or not registered for this client.</p>
+    {% if post_logout_redirect_uri %}
+      <p class="error-detail">post_logout_redirect_uri: <code>{{ post_logout_redirect_uri }}</code></p>
+    {% endif %}
+    <p class="error-detail">
+      If you're the developer of the application that sent you here, make sure
+      <code>post_logout_redirect_uri</code> is a valid, fully-qualified URI
+      registered for this client.
+    </p>
+  </div>
+{% endblock %}

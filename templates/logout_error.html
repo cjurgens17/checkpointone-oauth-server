@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-card">
+    <p class="error-code">invalid_request</p>
+    <h1>We can't process this logout request</h1>
+    <p>{{ message }}</p>
+    <p class="error-detail">
+      The <code>id_token_hint</code> provided could not be verified, so you have
+      not been logged out. Try logging out again from the application.
+    </p>
+  </div>
+{% endblock %}
