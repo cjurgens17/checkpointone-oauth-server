@@ -1,7 +1,12 @@
 import re
 from urllib.parse import unquote, urlsplit
 
-from utility.constants import VALID_OPEN_ID_SCOPE
+from utility.constants import (
+    GOOGLE_PROMPTS,
+    NATIVE_PROMPTS,
+    VALID_OPEN_ID_SCOPE,
+    IdentityProvider,
+)
 
 # RFC 3986 unreserved + reserved characters, plus "%" for pct-encoded triples.
 _ALLOWED_URI_CHARS = re.compile(r"^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]*$")
@@ -76,6 +81,15 @@ def valid_code_challenge_method(method: str):
 
 def valid_connection(connection: str):
     return connection in _VALID_CONNECTIONS
+
+def valid_prompt(prompt: str, connection: str):
+    if not prompt:
+        return True
+    if connection == IdentityProvider.NATIVE:
+        return prompt in NATIVE_PROMPTS
+    if connection == IdentityProvider.GOOGLE:
+        return prompt in GOOGLE_PROMPTS
+    return False
 
 def valid_email(email: str):
     if not email or not isinstance(email, str):
