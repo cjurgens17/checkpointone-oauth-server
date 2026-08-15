@@ -254,6 +254,8 @@ def authorize():
                         "redirect_uri": redirect_uri,
                         "scope": scope,
                         "state": state,
+                        "code_challenge": code_challenge,
+                        "code_challenge_method": code_challenge_method,
                         "audience": audience,
                     }
                     return _issue_auth_code(oauth_params, user, connection)
