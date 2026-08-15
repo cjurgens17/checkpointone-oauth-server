@@ -26,3 +26,9 @@ class ScreenHint:
 
 SCREEN_HINTS = [ScreenHint.LOGIN, ScreenHint.SIGNUP]
 
+class Prompt:
+    LOGIN = "login"
+    NONE = "none"
+    CONSENT = "consent"
+    SELECT_ACCOUNT = "select_account"
+

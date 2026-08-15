@@ -13,5 +13,10 @@ class Session(Base):
     session_id: Mapped[str] = mapped_column(String(64),nullable=False, index=True, unique=True)
     user_id: Mapped[str] = mapped_column(String(326), ForeignKey("users.user_id"), unique=True)
     expires_at: Mapped[datetime] = mapped_column(nullable=False)
+    client_id: Mapped[str] = mapped_column(String(64), ForeignKey("applications.client_id"), nullable=False)
+    response_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    scope: Mapped[str] = mapped_column(String(255), nullable=False)
+    connection: Mapped[str] = mapped_column(String(64), nullable=False)
+    audience: Mapped[str] = mapped_column(String(255), nullable=True)
     
     
