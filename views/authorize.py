@@ -243,6 +243,21 @@ def authorize():
                 )
                 return end_session(response, session_id)
         case IdentityProvider.GOOGLE:
+            if prompt != Prompt.LOGIN and is_valid_session():
+                session_id = request.cookies.get(SESSION_COOKIE_NAME)
+                session = get_session_from_session_id(session_id)
+                user = get_user_from_user_id(session.user_id)
+                if user:
+                    oauth_params = {
+                        "response_type": response_type,
+                        "client_id": client_id,
+                        "redirect_uri": redirect_uri,
+                        "scope": scope,
+                        "state": state,
+                        "audience": audience,
+                    }
+                    return _issue_auth_code(oauth_params, user, connection)
+
             server_state = prepare_redirect_to_oauth_server(
                 {
                     "state": state,
@@ -253,6 +268,7 @@ def authorize():
                     "client_id": client_id,
                     "response_type": response_type,
                     "audience": audience,
+                    "prompt": prompt
                 }
             )
             open_id_scope = retrieve_open_id_scope(scope)
@@ -270,6 +286,9 @@ def authorize():
                 "scope": open_id_scope,
                 "state": server_state,
             }
+            #Google Allows none, consent, and select_account
+            if prompt and prompt != "login":
+                params["prompt"] = prompt
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
         case IdentityProvider.FACEBOOK:
             pass
