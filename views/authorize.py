@@ -284,6 +284,8 @@ def authorize():
             #Google Allows none, consent, and select_account
             if prompt and prompt != "login":
                 params["prompt"] = prompt
+            elif not prompt:
+                params["prompt"] = "select_account"
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
         case IdentityProvider.FACEBOOK:
             pass
