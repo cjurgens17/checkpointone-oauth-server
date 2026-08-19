@@ -19,7 +19,6 @@ class IdentityProvider(StrEnum):
     FACEBOOK = "facebook"
     GITHUB = "github"
     CHECK_POINT_ONE = "cp1"
-    MICROSOFT = "microsoft-oidc"
 
 class ScreenHint:
     LOGIN = "login"

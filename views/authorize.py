@@ -339,8 +339,6 @@ def authorize():
                 "prompt": Prompt.SELECT_ACCOUNT,
             }
             return redirect(build_encoded_url(GITHUB_AUTHORIZATION_ENDPOINT, params))
-        case IdentityProvider.MICROSOFT:
-            pass
         case _:
             return redirect_with_error(
                 redirect_uri,
