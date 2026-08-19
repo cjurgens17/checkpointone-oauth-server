@@ -4,7 +4,7 @@ A minimal, multi-tenant OAuth 2.0 authorization server
 ## Features
 
 - Grant Types include Authorization Code Flow w/PKCE, Client Credentials, and more.
-- Branded, variable provider support with enterprise level names such as google, facebook, and github.
+- Branded, variable provider support with enterprise level names such as google and github.
 
 ### Login screen
 
