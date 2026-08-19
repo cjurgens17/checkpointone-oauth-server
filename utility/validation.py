@@ -29,7 +29,7 @@ _PASSWORD_HAS_UPPER = re.compile(r"[A-Z]")
 _PASSWORD_HAS_DIGIT = re.compile(r"\d")
 _PASSWORD_HAS_SYMBOL = re.compile(r"[^A-Za-z0-9]")
 
-_VALID_CONNECTIONS = {"Username-Password-Authentication", "google-oauth2", "facebook", "github", "apple", "windowslive","sms", "email"}
+_VALID_CONNECTIONS = {"Username-Password-Authentication", "google-oauth2", "github"}
 
 
 def valid_redirect_uri(redirect_uri: str):

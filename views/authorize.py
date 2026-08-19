@@ -298,8 +298,6 @@ def authorize():
             }
             params["prompt"] = prompt if prompt else Prompt.SELECT_ACCOUNT
             return redirect(build_encoded_url(GOOGLE_AUTHORIZATION_ENDPOINT, params))
-        case IdentityProvider.FACEBOOK:
-            pass
         case IdentityProvider.GITHUB:
             if prompt != Prompt.LOGIN and is_valid_session():
                 session_id = request.cookies.get(SESSION_COOKIE_NAME)
@@ -330,7 +328,7 @@ def authorize():
                     "audience": audience,
                 }
             )
-            #Force select_account for End-User convenience. Also matches google-oauth2 UX on signout. If external provider session is still active it interrupts the End-User to choose their account giving better insight into the fact they did logout from the Authorization session
+            #Force select_account for End-User convenience. Also matches google-oauth2 UX on signout. If external provider session is still active it interrupts the End-User to choose their account giving better insight into the fact they did logout from the Authorization server's session
             params = {
                 "client_id": GITHUB_CLIENT_ID,
                 "redirect_uri": GITHUB_REDIRECT_URI,
@@ -339,8 +337,6 @@ def authorize():
                 "prompt": Prompt.SELECT_ACCOUNT,
             }
             return redirect(build_encoded_url(GITHUB_AUTHORIZATION_ENDPOINT, params))
-        case IdentityProvider.MICROSOFT:
-            pass
         case _:
             return redirect_with_error(
                 redirect_uri,

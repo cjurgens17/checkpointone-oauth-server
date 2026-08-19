@@ -248,6 +248,58 @@ code {
   text-decoration: underline;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 1rem;
+  color: #8593b3;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dfe5f3;
+}
+
+.auth-providers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.auth-provider-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #16224a;
+  background: #fff;
+  border: 1px solid #c7d2e8;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.auth-provider-btn:hover {
+  background: #f4f7fd;
+  border-color: #aebbdc;
+}
+
+.auth-provider-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .password-strength {
   margin: 0.5rem 0 0.75rem;
 }
