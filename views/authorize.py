@@ -330,11 +330,13 @@ def authorize():
                     "audience": audience,
                 }
             )
+            #Force select_account for End-User convenience. Also matches google-oauth2 UX on signout. If external provider session is still active it interrupts the End-User to choose their account giving better insight into the fact they did logout from the Authorization session
             params = {
                 "client_id": GITHUB_CLIENT_ID,
                 "redirect_uri": GITHUB_REDIRECT_URI,
                 "state": server_state,
-                "scope": GITHUB_SCOPE
+                "scope": GITHUB_SCOPE,
+                "prompt": Prompt.SELECT_ACCOUNT,
             }
             return redirect(build_encoded_url(GITHUB_AUTHORIZATION_ENDPOINT, params))
         case IdentityProvider.MICROSOFT:
