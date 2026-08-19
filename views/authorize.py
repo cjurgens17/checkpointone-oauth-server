@@ -301,6 +301,23 @@ def authorize():
         case IdentityProvider.FACEBOOK:
             pass
         case IdentityProvider.GITHUB:
+            if prompt != Prompt.LOGIN and is_valid_session():
+                session_id = request.cookies.get(SESSION_COOKIE_NAME)
+                session = get_session_from_session_id(session_id)
+                user = get_user_from_user_id(session.user_id)
+                if user:
+                    oauth_params = {
+                        "response_type": response_type,
+                        "client_id": client_id,
+                        "redirect_uri": redirect_uri,
+                        "scope": scope,
+                        "state": state,
+                        "code_challenge": code_challenge,
+                        "code_challenge_method": code_challenge_method,
+                        "audience": audience,
+                    }
+                    return _issue_auth_code(oauth_params, user, connection)
+
             server_state = prepare_redirect_to_oauth_server(
                 {
                    "state": state,

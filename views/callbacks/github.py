@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request
 
 from repo.applications import get_application_from_client_id
-from repo.user import get_or_create_user_from_user_id
+from repo.user import get_or_create_user_from_user_id, get_user_from_user_id
 from services.connections.github import (
     exchange_code_for_access_token,
     get_userinfo,
@@ -128,21 +128,26 @@ def github_callback():
     username = userinfo.get("login")
 
     if not claims.get("email"):
-        pending_state = generate_state()
-        cache_set(
-            pending_state,
-            {
-                "resource_owner_request": resource_owner_request,
-                "user_id": user_id,
-                "username": username,
-                "claims": claims,
-            },
-            PENDING_EMAIL_TTL_SECONDS,
-        )
-        return render_template(
-            "github_email_required.html",
-            title="Confirm your email",
-            pending_state=pending_state,
-        )
+        existing_user = get_user_from_user_id(user_id)
+        if existing_user and existing_user.email:
+            claims["email"] = existing_user.email
+            claims["email_verified"] = existing_user.email_verified
+        else:
+            pending_state = generate_state()
+            cache_set(
+                pending_state,
+                {
+                    "resource_owner_request": resource_owner_request,
+                    "user_id": user_id,
+                    "username": username,
+                    "claims": claims,
+                },
+                PENDING_EMAIL_TTL_SECONDS,
+            )
+            return render_template(
+                "github_email_required.html",
+                title="Confirm your email",
+                pending_state=pending_state,
+            )
 
     return _issue_github_session(resource_owner_request, user_id, username, claims)
