@@ -17,7 +17,7 @@ class IdentityProvider(StrEnum):
     NATIVE = "Username-Password-Authentication"
     GOOGLE = "google-oauth2"
     FACEBOOK = "facebook"
-    GIHUB = "github"
+    GITHUB = "github"
     CHECK_POINT_ONE = "cp1"
     MICROSOFT = "microsoft-oidc"
 

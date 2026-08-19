@@ -6,6 +6,7 @@ from flask_restful import Api
 from resources.token import OAuthToken
 from seed import seed_database
 from views.authorize import authorize_bp
+from views.callbacks.github import github_callback_bp
 from views.callbacks.google import google_callback_bp
 from views.jwks import jwks_bp
 from views.logout import logout_bp
@@ -18,6 +19,7 @@ api.add_resource(OAuthToken, "/oauth/token")
 
 app.register_blueprint(authorize_bp)
 app.register_blueprint(google_callback_bp)
+app.register_blueprint(github_callback_bp)
 app.register_blueprint(jwks_bp)
 app.register_blueprint(logout_bp)
 
