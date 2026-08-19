@@ -7,6 +7,12 @@ from repo.applications import (
 )
 from repo.session import get_session_from_session_id
 from repo.user import get_user_from_user_id
+from services.connections.github import (
+    GITHUB_AUTHORIZATION_ENDPOINT,
+    GITHUB_CLIENT_ID,
+    GITHUB_REDIRECT_URI,
+    GITHUB_SCOPE,
+)
 from services.connections.google import (
     GOOGLE_AUTHORIZATION_ENDPOINT,
     GOOGLE_CLIENT_ID,
@@ -295,7 +301,25 @@ def authorize():
         case IdentityProvider.FACEBOOK:
             pass
         case IdentityProvider.GITHUB:
-            pass
+            server_state = prepare_redirect_to_oauth_server(
+                {
+                   "state": state,
+                    "redirect_uri": redirect_uri,
+                    "code_challenge_method": code_challenge_method,
+                    "code_challenge": code_challenge,
+                    "scope": scope,
+                    "client_id": client_id,
+                    "response_type": response_type,
+                    "audience": audience,
+                }
+            )
+            params = {
+                "client_id": GITHUB_CLIENT_ID,
+                "redirect_uri": GITHUB_REDIRECT_URI,
+                "state": server_state,
+                "scope": GITHUB_SCOPE
+            }
+            return redirect(build_encoded_url(GITHUB_AUTHORIZATION_ENDPOINT, params))
         case IdentityProvider.MICROSOFT:
             pass
         case _:

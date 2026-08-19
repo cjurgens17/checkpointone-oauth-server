@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block body_class %}auth-background{% endblock %}
+
+{% block content %}
+  <div class="auth-card">
+    <img class="auth-logo" src="{{ url_for('static', filename='assets/checkpointone_logo.svg') }}" alt="logo">
+
+    <h1 class="auth-heading">Confirm your email</h1>
+    <p class="auth-subheading">GitHub didn't share an email address for this account. Enter one to continue.</p>
+
+    {% if error %}
+      <p class="auth-error">{{ error }}</p>
+    {% endif %}
+
+    <form class="auth-form" method="post" action="{{ url_for('callbacks_github.github_callback') }}">
+      <input type="hidden" name="pending_state" value="{{ pending_state }}">
+
+      <label class="auth-label" for="email">Email address</label>
+      <input class="auth-input" type="email" id="email" name="email" value="{{ email or '' }}" required>
+
+      <button class="auth-submit" type="submit">Continue</button>
+    </form>
+  </div>
+{% endblock %}
