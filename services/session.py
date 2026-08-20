@@ -35,14 +35,7 @@ def is_valid_session():
     if not session:
         return False
 
-    expires_at = session.expires_at
-    #Format timezones for equal comparison
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    else:
-        expires_at = expires_at.astimezone(timezone.utc)
-
-    return expires_at > datetime.now(timezone.utc)
+    return session.expires_at > datetime.now(timezone.utc)
 
 def remove_session(session_id):
     delete_session(session_id)
