@@ -4,9 +4,10 @@ from datetime import datetime, timedelta, timezone
 from utility.helpers import hash_sha256
 
 REFRESH_TOKEN_BYTE_LENGTH = 32
-DEFAULT_REFRESH_TOKEN_IDLE_TIME = 604800
+DEFAULT_REFRESH_TOKEN_IDLE_TIME = 604800 # 7 Days
+DEFAULT_REFRESH_TOKEN_ABSOLUTE_TTL = 1209600 # 14 Days
 
-def generate_refresh_token():
+def generate_refresh_token_tag():
     return secrets.token_urlsafe(REFRESH_TOKEN_BYTE_LENGTH)
 
 
@@ -33,3 +34,11 @@ def refresh_token_validity_metadata(refresh_token, now: datetime | None = None):
 
 def generate_exp(iat):
     return iat + timedelta(seconds=DEFAULT_REFRESH_TOKEN_IDLE_TIME)
+
+def generate_absolute_exp(iat):
+    return iat + timedelta(seconds=DEFAULT_REFRESH_TOKEN_ABSOLUTE_TTL)
+
+def scope_requires_refresh_token(scope):
+    if not scope:
+        return False
+    return "offline_access" in scope.split(" ")

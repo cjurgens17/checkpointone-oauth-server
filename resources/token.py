@@ -1,3 +1,5 @@
+import uuid
+
 from flask import request
 from flask_restful import Resource
 
@@ -23,10 +25,12 @@ from services.tokens.authorization_code import (
 )
 from services.tokens.id_token import generate_id_token
 from services.tokens.refresh_token import (
+    generate_absolute_exp,
     generate_exp,
-    generate_refresh_token,
+    generate_refresh_token_tag,
     hash_refresh_token,
     refresh_token_validity_metadata,
+    scope_requires_refresh_token,
 )
 from utility.constants import ClientType, GrantType, RevokeReason
 from utility.helpers import get_current_timestamp
@@ -38,6 +42,24 @@ REQUIRED_PARAMS = [
     "client_id",
     "audience",
 ]
+
+
+def _issue_refresh_token(sub, scope, audience, client_id):
+    iat = get_current_timestamp()
+    refresh_token = generate_refresh_token_tag()
+    refresh_token_record = create_refresh_token(
+        sub=sub,
+        token_hash=hash_refresh_token(refresh_token),
+        scope=scope,
+        audience=audience,
+        client_id=client_id,
+        iat=iat,
+        exp=generate_exp(iat),
+        absolute_exp=generate_absolute_exp(iat),
+        family_id=uuid.uuid4(),
+        parent_id=None,
+    )
+    return refresh_token, refresh_token_record
 
 
 class OAuthToken(Resource):
@@ -102,7 +124,7 @@ class OAuthToken(Resource):
                 update_refresh_token_used_at(hash_refresh_token(body.get("refresh_token")), get_current_timestamp())
                 revoke_refresh_token(hash_refresh_token(body.get("refresh_token")),RevokeReason.ROTATE, get_current_timestamp())
                 iat = get_current_timestamp()
-                new_refresh_token = generate_refresh_token()
+                new_refresh_token = generate_refresh_token_tag()
                 next_refresh_token = create_refresh_token(sub=refresh_token_record.sub,token_hash=hash_refresh_token(new_refresh_token),scope=refresh_token_record.scope,audience=refresh_token_record.audience,client_id=refresh_token_record.client_id,iat=iat, exp=generate_exp(iat), absolute_exp=refresh_token_record.absolute_exp, family_id=refresh_token_record.family_id, parent_id=refresh_token_record.id)
 
                 client_metadata = {
@@ -160,6 +182,14 @@ class OAuthToken(Resource):
                 "token_type": "Bearer",
                 "expires_in": ACCESS_TOKEN_TTL_SECONDS
             }
+            if scope_requires_refresh_token(body.get("scope")):
+                refresh_token, _ = _issue_refresh_token(
+                    sub=client.client_id,
+                    scope=confidential_client_metadata.get("permissions"),
+                    audience=confidential_client_metadata.get("audience"),
+                    client_id=client.client_id,
+                )
+                oauth_response["refresh_token"] = refresh_token
             return oauth_response, 200, {"Cache-Control": "no-store"}
             
 
@@ -220,4 +250,12 @@ class OAuthToken(Resource):
         }
         if "openid" in client_metadata.get("scope", "").split(" "):
             oauth_response["id_token"] = generate_id_token(client_metadata)
+        if scope_requires_refresh_token(client_metadata.get("scope")):
+            refresh_token, _ = _issue_refresh_token(
+                sub=client_metadata.get("sub"),
+                scope=client_metadata.get("scope"),
+                audience=client_metadata.get("audience"),
+                client_id=client_metadata.get("client_id"),
+            )
+            oauth_response["refresh_token"] = refresh_token
         return oauth_response, 200, {"Cache-Control": "no-store"}
