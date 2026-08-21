@@ -24,13 +24,14 @@ from services.tokens.authorization_code import (
 from services.tokens.id_token import generate_id_token
 from services.tokens.refresh_token import (
     generate_exp,
+    generate_refresh_token,
     hash_refresh_token,
     refresh_token_validity_metadata,
 )
 from utility.constants import ClientType, GrantType, RevokeReason
 from utility.helpers import get_current_timestamp
 
-#Currently, Only supporting authorization_code and client_credentials grant_type
+#supporting authorization_code, client_credentials, and refresh_token grant_type
 
 REQUIRED_PARAMS = [
     "grant_type",
@@ -90,7 +91,6 @@ class OAuthToken(Resource):
             if refresh_token_metadata.get("already_used") or refresh_token_metadata.get("revoked"):
                 #Assume Compromise(refresh token reuse abuse)
                 revoke_refresh_token_family(refresh_token_metadata.get("family_id"), RevokeReason.REUSE, get_current_timestamp())
-                #End session if one is active and return
             elif refresh_token_metadata.get("expired"):
                 return {
                     "error": "invalid_grant",
@@ -102,8 +102,27 @@ class OAuthToken(Resource):
                 update_refresh_token_used_at(hash_refresh_token(body.get("refresh_token")), get_current_timestamp())
                 revoke_refresh_token(hash_refresh_token(body.get("refresh_token")),RevokeReason.ROTATE, get_current_timestamp())
                 iat = get_current_timestamp()
-                next_refresh_token = create_refresh_token(subject=refresh_token_record.subject,token_hash=refresh_token_record.token_hash,scope=refresh_token_record.scope,audience=refresh_token_record.audience,client_id=refresh_token_record.client_id,iat=iat, exp=generate_exp(iat), absolute_exp=refresh_token_record.absolute_exp, family_id=refresh_token_record.family_id, parent_id=refresh_token_record.id)
-                
+                new_refresh_token = generate_refresh_token()
+                next_refresh_token = create_refresh_token(subject=refresh_token_record.subject,token_hash=hash_refresh_token(new_refresh_token),scope=refresh_token_record.scope,audience=refresh_token_record.audience,client_id=refresh_token_record.client_id,iat=iat, exp=generate_exp(iat), absolute_exp=refresh_token_record.absolute_exp, family_id=refresh_token_record.family_id, parent_id=refresh_token_record.id)
+
+                client_metadata = {
+                    "sub": next_refresh_token.subject,
+                    "audience": next_refresh_token.audience,
+                    "scope": next_refresh_token.scope,
+                    "client_id": next_refresh_token.client_id,
+                }
+                access_token = create_access_token(client_metadata) if client.client_type != ClientType.WEB_APPLICATION else create_confidential_client_access_token(client_metadata)
+
+                oauth_response = {
+                    "access_token": access_token,
+                    "refresh_token": new_refresh_token,
+                    "token_type": "Bearer",
+                    "expires_in": ACCESS_TOKEN_TTL_SECONDS,
+                    "scope": next_refresh_token.scope,
+                }
+                if "openid" in next_refresh_token.scope.split(" "):
+                    oauth_response["id_token"] = generate_id_token(client_metadata)
+                return oauth_response, 200, {"Cache-Control": "no-store"}
 
 
             
