@@ -6,6 +6,7 @@ VALID_OPEN_ID_SCOPE = ["openid", "profile", "email", "address", "phone"]
 class GrantType(StrEnum):
     CODE_FLOW = "authorization_code"
     CONFIDENTIAL = "client_credentials"
+    REFRESH = "refresh_token"
 
 class ClientType:
     WEB_APPLICATION = "Web Application"
@@ -27,6 +28,13 @@ class Prompt:
     NONE = "none"
     CONSENT = "consent"
     SELECT_ACCOUNT = "select_account"
+
+class RevokeReason:
+    LOGOUT = "logout"
+    ADMIN = "admin_action"
+    PASSWORD_CHANGE = "password_change"
+    REUSE = "reuse_detected"
+    ROTATE = "valid_rotation"
     
 SCREEN_HINTS = [ScreenHint.LOGIN, ScreenHint.SIGNUP]
 NATIVE_PROMPTS = [Prompt.NONE, Prompt.LOGIN, Prompt.SELECT_ACCOUNT, Prompt.CONSENT]

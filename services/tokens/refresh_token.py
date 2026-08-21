@@ -1,10 +1,10 @@
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from utility.helpers import hash_sha256
 
 REFRESH_TOKEN_BYTE_LENGTH = 32
-
+DEFAULT_REFRESH_TOKEN_IDLE_TIME = 604800
 
 def generate_refresh_token():
     return secrets.token_urlsafe(REFRESH_TOKEN_BYTE_LENGTH)
@@ -25,7 +25,11 @@ def refresh_token_validity_metadata(refresh_token, now: datetime | None = None):
     return {
         "valid": valid,
         "already_used": already_used,
+        "expired": expired,
         "revoked": revoked,
         "revoke_reason": refresh_token.revoke_reason,
         "family_id": refresh_token.family_id,
     }
+
+def generate_exp(iat):
+    return iat + timedelta(seconds=DEFAULT_REFRESH_TOKEN_IDLE_TIME)

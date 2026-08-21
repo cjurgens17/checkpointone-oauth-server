@@ -12,7 +12,7 @@ class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
     __table_args__ = (
         CheckConstraint(
-            "revoke_reason IN ('logout', 'admin_action', 'password_change', 'reuse_detected')",
+            "revoke_reason IN ('logout', 'admin_action', 'password_change', 'reuse_detected', 'valid_rotation')",
             name="ck_refresh_tokens_revoke_reason_allowed_values",
         ),
     )

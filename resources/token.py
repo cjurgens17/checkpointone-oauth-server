@@ -2,6 +2,13 @@ from flask import request
 from flask_restful import Resource
 
 from repo.applications import get_application_from_client_id
+from repo.refresh_token import (
+    create_refresh_token,
+    get_refresh_token_from_token_hash,
+    revoke_refresh_token,
+    revoke_refresh_token_family,
+    update_refresh_token_used_at,
+)
 from repo.session import get_session_from_session_id
 from services.session import SESSION_COOKIE_NAME, is_valid_session
 from services.tokens.access_token import (
@@ -15,7 +22,13 @@ from services.tokens.authorization_code import (
     valid_code_challenge,
 )
 from services.tokens.id_token import generate_id_token
-from utility.constants import ClientType, GrantType
+from services.tokens.refresh_token import (
+    generate_exp,
+    hash_refresh_token,
+    refresh_token_validity_metadata,
+)
+from utility.constants import ClientType, GrantType, RevokeReason
+from utility.helpers import get_current_timestamp
 
 #Currently, Only supporting authorization_code and client_credentials grant_type
 
@@ -38,6 +51,63 @@ class OAuthToken(Resource):
                 "error_description": f"Missing required parameter(s): {', '.join(missing)}.",
             }, 400
         
+        #Handle refresh_token grant_type
+        if GrantType.REFRESH == body.get("grant_type"):
+            if not body.get("refresh_token"):
+                return {
+                    "error": "invalid_request",
+                    "error_description": "invalid arguments for specified grant_type"
+                }, 400
+            
+            client = get_application_from_client_id(body.get("client_id"))
+
+            if not client:
+                return {
+                    "error": "invalid_request",
+                    "error_description": "requested client is not registered"
+                }
+            if ClientType.WEB_APPLICATION == client.client_type and not body.get("client_secret"):
+                return {
+                    "error": "invalid_request",
+                    "error_description": "confidential clients require client_secret"
+                }, 400
+            elif ClientType.WEB_APPLICATION == client.client_type and client.client_secret != body.get("client_secret"):
+                return {
+                    "error": "invalid_request",
+                    "error_description": "invalid arguments for specified grant_type"
+                }, 400
+
+            refresh_token_record = get_refresh_token_from_token_hash(hash_refresh_token(body.get("refresh_token")))
+
+            if not refresh_token_record:
+                return {
+                    "error": "invalid_request",
+                    "error_description": "invalid arguments for specified grant_type"
+                }, 400
+
+            refresh_token_metadata = refresh_token_validity_metadata(refresh_token_record, get_current_timestamp())
+
+            if refresh_token_metadata.get("already_used") or refresh_token_metadata.get("revoked"):
+                #Assume Compromise(refresh token reuse abuse)
+                revoke_refresh_token_family(refresh_token_metadata.get("family_id"), RevokeReason.REUSE, get_current_timestamp())
+                #End session if one is active and return
+            elif refresh_token_metadata.get("expired"):
+                return {
+                    "error": "invalid_grant",
+                    "error_description": "new authorization is required"
+                }, 400
+
+            #Rotate Refresh Token
+            if refresh_token_metadata.get("valid"):
+                update_refresh_token_used_at(hash_refresh_token(body.get("refresh_token")), get_current_timestamp())
+                revoke_refresh_token(hash_refresh_token(body.get("refresh_token")),RevokeReason.ROTATE, get_current_timestamp())
+                iat = get_current_timestamp()
+                next_refresh_token = create_refresh_token(subject=refresh_token_record.subject,token_hash=refresh_token_record.token_hash,scope=refresh_token_record.scope,audience=refresh_token_record.audience,client_id=refresh_token_record.client_id,iat=iat, exp=generate_exp(iat), absolute_exp=refresh_token_record.absolute_exp, family_id=refresh_token_record.family_id, parent_id=refresh_token_record.id)
+                
+
+
+            
+
         #Handle client_credentials grant_type
         if GrantType.CONFIDENTIAL == body.get("grant_type"):
             client = get_application_from_client_id(body.get("client_id"))

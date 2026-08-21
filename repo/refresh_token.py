@@ -79,7 +79,7 @@ def revoke_refresh_token_family(family_id, revoke_reason: str, revoked_at: datet
     with SessionLocal() as session:
         stmt = (
             update(RefreshToken)
-            .where(RefreshToken.family_id == family_id)
+            .where(RefreshToken.family_id == family_id, RefreshToken.revoked_at.is_(None))
             .values(revoked_at=revoked_at or datetime.now(timezone.utc), revoke_reason=revoke_reason)
         )
         session.execute(stmt)

@@ -1,6 +1,7 @@
 import hashlib
 import secrets
 import string
+from datetime import datetime, timezone
 from urllib.parse import urlencode
 
 from utility.constants import VALID_OPEN_ID_SCOPE
@@ -34,3 +35,6 @@ def retrieve_open_id_scope(scope):
 #TODO- some type of callback system here to enforce uniqueness across tenant users
 def generate_unique_sub_id():
     return "".join(secrets.choice(ALPHANUMERIC_ALPHABET) for _ in range(ALPHANUMERIC_LENGTH))
+
+def get_current_timestamp():
+    return datetime.now(timezone.utc)
