@@ -21,10 +21,12 @@ def create_auth_code(data):
     cache_set(code, payload, AUTH_CODE_TTL_SECONDS)
     return code
 
+
 def redeem_auth_code(code):
     data = cache_get(code)
     cache_delete(code)
     return data
+
 
 def auth_code_expired(data):
     expires_at = data.get("expires_at")
@@ -32,8 +34,8 @@ def auth_code_expired(data):
         return True
     return datetime.now(timezone.utc) >= datetime.fromisoformat(expires_at)
 
+
 def valid_code_challenge(code_verifier, code_challenge_method, code_challenge):
     if not valid_code_challenge_method(code_challenge_method):
         return False
     return hash_sha256(code_verifier) == code_challenge
-

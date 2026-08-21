@@ -3,7 +3,7 @@ from typing import Any
 
 from utility.redis.client import redis_client
 
-#Current Cache consist of state, authorization codes, resource owner arguments - all short lived so far
+# Current Cache consist of state, authorization codes, resource owner arguments - all short lived so far
 DEFAULT_TTL_SECONDS = 900
 
 
