@@ -15,7 +15,7 @@ def create_refresh_token(
     iat: datetime,
     exp: datetime,
     absolute_exp: datetime,
-    family_id:UUID,
+    family_id: UUID,
     parent_id=None,
 ):
     refresh_token_metadata = {
@@ -50,7 +50,11 @@ def update_refresh_token_used_at(token_hash: str, used_at: datetime | None = Non
     if not token_hash:
         return None
     with SessionLocal() as session:
-        stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash).with_for_update()
+        stmt = (
+            select(RefreshToken)
+            .where(RefreshToken.token_hash == token_hash)
+            .with_for_update()
+        )
         refresh_token = session.scalars(stmt).first()
         if refresh_token is None:
             return None
@@ -59,11 +63,17 @@ def update_refresh_token_used_at(token_hash: str, used_at: datetime | None = Non
         return refresh_token
 
 
-def revoke_refresh_token(token_hash: str, revoke_reason: str, revoked_at: datetime | None = None):
+def revoke_refresh_token(
+    token_hash: str, revoke_reason: str, revoked_at: datetime | None = None
+):
     if not token_hash:
         return None
     with SessionLocal() as session:
-        stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash).with_for_update()
+        stmt = (
+            select(RefreshToken)
+            .where(RefreshToken.token_hash == token_hash)
+            .with_for_update()
+        )
         refresh_token = session.scalars(stmt).first()
         if refresh_token is None:
             return None
@@ -73,14 +83,21 @@ def revoke_refresh_token(token_hash: str, revoke_reason: str, revoked_at: dateti
         return refresh_token
 
 
-def revoke_refresh_token_family(family_id, revoke_reason: str, revoked_at: datetime | None = None):
+def revoke_refresh_token_family(
+    family_id, revoke_reason: str, revoked_at: datetime | None = None
+):
     if not family_id:
         raise ValueError("family_id is required to revoke_refresh_token_family")
     with SessionLocal() as session:
         stmt = (
             update(RefreshToken)
-            .where(RefreshToken.family_id == family_id, RefreshToken.revoked_at.is_(None))
-            .values(revoked_at=revoked_at or datetime.now(timezone.utc), revoke_reason=revoke_reason)
+            .where(
+                RefreshToken.family_id == family_id, RefreshToken.revoked_at.is_(None)
+            )
+            .values(
+                revoked_at=revoked_at or datetime.now(timezone.utc),
+                revoke_reason=revoke_reason,
+            )
         )
         session.execute(stmt)
         session.commit()

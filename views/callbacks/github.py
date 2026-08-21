@@ -47,7 +47,9 @@ def _issue_github_session(resource_owner_request, user_id, username, claims):
     resource_owner_request["provider_claims"] = claims
     auth_code = create_auth_code(resource_owner_request)
     params = {"state": resource_owner_request["state"], "code": auth_code}
-    response = redirect(build_encoded_url(resource_owner_request["redirect_uri"], params))
+    response = redirect(
+        build_encoded_url(resource_owner_request["redirect_uri"], params)
+    )
 
     session_cookie_name, session_id, cookie_options = generate_server_session_cookie(
         user.user_id,
@@ -63,7 +65,7 @@ def _issue_github_session(resource_owner_request, user_id, username, claims):
 
 @github_callback_bp.route("/callback/github", methods=["GET", "POST"])
 def github_callback():
-    #Interrupt if github comes back with a null email
+    # Interrupt if github comes back with a null email
     if request.method == "POST":
         pending_state = request.form.get("pending_state")
         email = request.form.get("email", "").strip()
@@ -95,7 +97,10 @@ def github_callback():
         claims["email"] = email
         claims["email_verified"] = False
         return _issue_github_session(
-            pending["resource_owner_request"], pending["user_id"], pending["username"], claims
+            pending["resource_owner_request"],
+            pending["user_id"],
+            pending["username"],
+            claims,
         )
 
     returned_state = request.args.get("state")

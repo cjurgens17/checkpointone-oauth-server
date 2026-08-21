@@ -9,7 +9,9 @@ load_dotenv()
 
 JWT_PRIVATE_KEY = os.getenv("JWT_PRIVATE_KEY", "").replace("\\n", "\n")
 
-_private_key = serialization.load_pem_private_key(JWT_PRIVATE_KEY.encode(), password=None)
+_private_key = serialization.load_pem_private_key(
+    JWT_PRIVATE_KEY.encode(), password=None
+)
 _public_key = _private_key.public_key()
 
 JWT_PUBLIC_KEY = _public_key.public_bytes(

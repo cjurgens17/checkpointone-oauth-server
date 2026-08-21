@@ -27,8 +27,8 @@ SEED_APPLICATION = [
         "name": "Brute Force",
         "redirect_uris": [],
         "logout_uris": [],
-        "permissions": ["king", "owned", "taken", "sudo", "root", "pwned", "1337"]
-    }
+        "permissions": ["king", "owned", "taken", "sudo", "root", "pwned", "1337"],
+    },
 ]
 
 SEED_USER = [
@@ -38,7 +38,7 @@ SEED_USER = [
         "sub": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2",
         "connection": "Username-Password-Authentication",
         "password": generate_password_hash("Password123!"),
-        "user_id": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2"
+        "user_id": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2",
     }
 ]
 

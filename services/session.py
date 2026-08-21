@@ -11,10 +11,18 @@ IS_LOCAL_ENV = os.getenv("env", "production") == "local"
 
 
 def generate_server_session_cookie(
-    user_id, client_id, response_type, scope, connection, audience=None, ttl=SESSION_TTL_SECONDS
+    user_id,
+    client_id,
+    response_type,
+    scope,
+    connection,
+    audience=None,
+    ttl=SESSION_TTL_SECONDS,
 ):
 
-    session = create_session(user_id, ttl, client_id, response_type, scope, connection, audience)
+    session = create_session(
+        user_id, ttl, client_id, response_type, scope, connection, audience
+    )
 
     cookie_options = {
         "max_age": ttl,
@@ -25,6 +33,7 @@ def generate_server_session_cookie(
     }
 
     return SESSION_COOKIE_NAME, session.session_id, cookie_options
+
 
 def is_valid_session():
     session_id = request.cookies.get(SESSION_COOKIE_NAME)
@@ -37,8 +46,10 @@ def is_valid_session():
 
     return session.expires_at > datetime.now(timezone.utc)
 
+
 def remove_session(session_id):
     delete_session(session_id)
+
 
 def end_session(response, session_id):
     if session_id:

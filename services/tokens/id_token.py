@@ -62,11 +62,13 @@ def generate_id_token(client_metadata):
 
     payload = merge_provider_claims(scope, payload, provider_claims)
 
-    return jwt.encode(payload, JWT_PRIVATE_KEY, algorithm="RS256", headers={"kid": JWT_KEY_ID})
+    return jwt.encode(
+        payload, JWT_PRIVATE_KEY, algorithm="RS256", headers={"kid": JWT_KEY_ID}
+    )
 
 
 def verify_id_token_on_logout(id_token: str) -> dict:
-    #Raises jwt.InvalidTokenError if decoding fails
+    # Raises jwt.InvalidTokenError if decoding fails
     return jwt.decode(
         id_token,
         JWT_PUBLIC_KEY,
