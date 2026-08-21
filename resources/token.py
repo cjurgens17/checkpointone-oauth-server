@@ -23,7 +23,7 @@ from services.tokens.authorization_code import (
     redeem_auth_code,
     valid_code_challenge,
 )
-from services.tokens.id_token import generate_id_token
+from services.tokens.id_token import generate_id_token, scope_requires_id_token
 from services.tokens.refresh_token import (
     generate_absolute_exp,
     generate_exp,
@@ -142,7 +142,7 @@ class OAuthToken(Resource):
                     "expires_in": ACCESS_TOKEN_TTL_SECONDS,
                     "scope": next_refresh_token.scope,
                 }
-                if "openid" in next_refresh_token.scope.split(" "):
+                if scope_requires_id_token(next_refresh_token.scope):
                     oauth_response["id_token"] = generate_id_token(client_metadata)
                 return oauth_response, 200, {"Cache-Control": "no-store"}
 
@@ -248,7 +248,7 @@ class OAuthToken(Resource):
             "token_type": "Bearer",
             "expires_in": ACCESS_TOKEN_TTL_SECONDS,
         }
-        if "openid" in client_metadata.get("scope", "").split(" "):
+        if scope_requires_id_token(client_metadata.get("scope")):
             oauth_response["id_token"] = generate_id_token(client_metadata)
         if scope_requires_refresh_token(client_metadata.get("scope")):
             refresh_token, _ = _issue_refresh_token(

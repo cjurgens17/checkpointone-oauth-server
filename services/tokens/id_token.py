@@ -34,6 +34,12 @@ _CLAIM_KEYS = {
 }
 
 
+def scope_requires_id_token(scope):
+    if not scope:
+        return False
+    return "openid" in scope.split(" ")
+
+
 def _copy_present_claims(payload, provider_claims, keys):
     for key in keys:
         if key in provider_claims:
