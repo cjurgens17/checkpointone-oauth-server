@@ -18,7 +18,7 @@ class RefreshToken(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    subject: Mapped[str] = mapped_column(nullable=False)
+    sub: Mapped[str] = mapped_column(nullable=False)
     token_hash: Mapped[str] = mapped_column(String(255), unique=True)
     used_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     revoked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)

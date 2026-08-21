@@ -7,7 +7,7 @@ from models.refresh_token import RefreshToken
 
 
 def create_refresh_token(
-    subject: str,
+    sub: str,
     token_hash: str,
     scope: str,
     audience: str,
@@ -19,7 +19,7 @@ def create_refresh_token(
     parent_id=None,
 ):
     refresh_token_metadata = {
-        "subject": subject,
+        "sub": sub,
         "token_hash": token_hash,
         "scope": scope,
         "audience": audience,

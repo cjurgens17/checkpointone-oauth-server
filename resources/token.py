@@ -103,10 +103,10 @@ class OAuthToken(Resource):
                 revoke_refresh_token(hash_refresh_token(body.get("refresh_token")),RevokeReason.ROTATE, get_current_timestamp())
                 iat = get_current_timestamp()
                 new_refresh_token = generate_refresh_token()
-                next_refresh_token = create_refresh_token(subject=refresh_token_record.subject,token_hash=hash_refresh_token(new_refresh_token),scope=refresh_token_record.scope,audience=refresh_token_record.audience,client_id=refresh_token_record.client_id,iat=iat, exp=generate_exp(iat), absolute_exp=refresh_token_record.absolute_exp, family_id=refresh_token_record.family_id, parent_id=refresh_token_record.id)
+                next_refresh_token = create_refresh_token(sub=refresh_token_record.sub,token_hash=hash_refresh_token(new_refresh_token),scope=refresh_token_record.scope,audience=refresh_token_record.audience,client_id=refresh_token_record.client_id,iat=iat, exp=generate_exp(iat), absolute_exp=refresh_token_record.absolute_exp, family_id=refresh_token_record.family_id, parent_id=refresh_token_record.id)
 
                 client_metadata = {
-                    "sub": next_refresh_token.subject,
+                    "sub": next_refresh_token.sub,
                     "audience": next_refresh_token.audience,
                     "scope": next_refresh_token.scope,
                     "client_id": next_refresh_token.client_id,
