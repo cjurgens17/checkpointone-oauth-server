@@ -1,3 +1,5 @@
+import uuid
+
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from repo.user import get_or_create_user_from_user_id, get_user_from_email
@@ -38,7 +40,7 @@ def email_already_registered(email: str) -> bool:
     return get_user_from_email(email) is not None
 
 
-def register_user(email: str, password: str, tenant_id: int):
+def register_user(email: str, password: str, tenant_id: uuid.UUID):
     user_id = f"{IdentityProvider.CHECK_POINT_ONE}|{generate_unique_sub_id()}"
     return get_or_create_user_from_user_id(
         user_id,

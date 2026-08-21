@@ -23,6 +23,7 @@ app.register_blueprint(github_callback_bp)
 app.register_blueprint(jwks_bp)
 app.register_blueprint(logout_bp)
 
+
 @app.get("/")
 def index():
     return render_template("index.html", title="Home")

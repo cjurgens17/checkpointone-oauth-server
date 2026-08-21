@@ -9,7 +9,8 @@ jwks_bp = Blueprint("jwks", __name__)
 
 ISSUER = os.getenv("ISSUER", "http://localhost:5000")
 
-#Refer to https://datatracker.ietf.org/doc/html/rfc8414
+# Refer to https://datatracker.ietf.org/doc/html/rfc8414
+
 
 @jwks_bp.get("/.well-known/jwks.json")
 def jwks():
@@ -24,7 +25,11 @@ def _discovery_metadata():
         "end_session_endpoint": f"{ISSUER}/logout",
         "jwks_uri": f"{ISSUER}/.well-known/jwks.json",
         "response_types_supported": ["code"],
-        "grant_types_supported": ["authorization_code", "client_credentials"],
+        "grant_types_supported": [
+            "authorization_code",
+            "client_credentials",
+            "refresh_token",
+        ],
         "subject_types_supported": ["public"],
         "id_token_signing_alg_values_supported": ["RS256"],
         "scopes_supported": VALID_OPEN_ID_SCOPE,

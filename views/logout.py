@@ -13,9 +13,10 @@ logout_bp = Blueprint("logout", __name__)
 
 ISSUER = os.getenv("ISSUER", "http://localhost:5000")
 
-#https://openid.net/specs/openid-connect-rpinitiated-1_0.html
-#It is up to the RP to make the decision to logout the user locally upon redirection. It is up to the AS to ensure the current RP is logged-out and any RP's associated with its OP.
-#OIDF State Logout MUST include GET and POST Methods
+
+# https://openid.net/specs/openid-connect-rpinitiated-1_0.html
+# It is up to the RP to make the decision to logout the user locally upon redirection. It is up to the AS to ensure the current RP is logged-out and any RP's associated with its OP.
+# OIDF State Logout MUST include GET and POST Methods
 @logout_bp.route("/logout", methods=["GET", "POST"])
 def logout():
     client_id = request.values.get("client_id")
@@ -27,8 +28,8 @@ def logout():
             "id_token_hint_missing.html",
             title="Logout Error",
         ), 400
-    
-    #Defaulting to Username-Password-Authentication for now - OP is CheckPointOne in this case.
+
+    # Defaulting to Username-Password-Authentication for now - OP is CheckPointOne in this case.
     try:
         verify_id_token_on_logout(id_token_hint)
     except jwt.InvalidTokenError as error:

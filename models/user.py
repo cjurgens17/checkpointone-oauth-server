@@ -1,5 +1,7 @@
+import uuid
+
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, String
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -14,7 +16,9 @@ class User(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     username: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(String(255), index=True, unique=True)
     email_verified: Mapped[bool] = mapped_column(nullable=True)
@@ -38,5 +42,7 @@ class User(Base):
     sub: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     connection: Mapped[str] = mapped_column(String(64))
     password: Mapped[str] = mapped_column(String(255), nullable=True)
-    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenant.id"))
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenant.id")
+    )
     user_id: Mapped[str] = mapped_column(String(326), unique=True, index=True)

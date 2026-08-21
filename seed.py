@@ -18,7 +18,7 @@ SEED_APPLICATION = [
         "name": "CheckPointOne",
         "redirect_uris": ["http://localhost:4200/callback"],
         "logout_uris": ["http://localhost:4200/logout"],
-        "permissions": [],
+        "permissions": ["offline_access"],
     },
     {
         "client_id": "client_confidential_sdfkj3l4kj",
@@ -27,8 +27,8 @@ SEED_APPLICATION = [
         "name": "Brute Force",
         "redirect_uris": [],
         "logout_uris": [],
-        "permissions": ["king", "owned", "taken", "sudo", "root", "pwned", "1337"]
-    }
+        "permissions": ["king", "owned", "taken", "sudo", "root", "pwned", "1337", "offline_access"],
+    },
 ]
 
 SEED_USER = [
@@ -38,7 +38,7 @@ SEED_USER = [
         "sub": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2",
         "connection": "Username-Password-Authentication",
         "password": generate_password_hash("Password123!"),
-        "user_id": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2"
+        "user_id": f"{IdentityProvider.CHECK_POINT_ONE}|slkj234lksjdfl2",
     }
 ]
 

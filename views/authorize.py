@@ -180,7 +180,7 @@ def authorize():
                     "code_challenge": code_challenge,
                     "code_challenge_method": code_challenge_method,
                     "audience": audience,
-                    "prompt": prompt
+                    "prompt": prompt,
                 }
                 form_context = {
                     **oauth_params,
@@ -285,7 +285,7 @@ def authorize():
                     "client_id": client_id,
                     "response_type": response_type,
                     "audience": audience,
-                    "prompt": prompt
+                    "prompt": prompt,
                 }
             )
             open_id_scope = retrieve_open_id_scope(scope)
@@ -318,7 +318,7 @@ def authorize():
 
             server_state = prepare_redirect_to_oauth_server(
                 {
-                   "state": state,
+                    "state": state,
                     "redirect_uri": redirect_uri,
                     "code_challenge_method": code_challenge_method,
                     "code_challenge": code_challenge,
@@ -328,7 +328,7 @@ def authorize():
                     "audience": audience,
                 }
             )
-            #Force select_account for End-User convenience. Also matches google-oauth2 UX on signout. If external provider session is still active it interrupts the End-User to choose their account giving better insight into the fact they did logout from the Authorization server's session
+            # Force select_account for End-User convenience. Also matches google-oauth2 UX on signout. If external provider session is still active it interrupts the End-User to choose their account giving better insight into the fact they did logout from the Authorization server's session
             params = {
                 "client_id": GITHUB_CLIENT_ID,
                 "redirect_uri": GITHUB_REDIRECT_URI,

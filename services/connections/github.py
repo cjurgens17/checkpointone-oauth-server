@@ -12,7 +12,8 @@ GITHUB_USERINFO = os.getenv("GITHUB_USERINFO")
 # GitHub has no OIDC scope model, so we always request the fixed set
 GITHUB_SCOPE = "read:user user:email"
 
-def exchange_code_for_access_token(code:str) -> str:
+
+def exchange_code_for_access_token(code: str) -> str:
     payload = {
         "code": code,
         "client_id": GITHUB_CLIENT_ID,
