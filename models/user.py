@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import CheckConstraint, ForeignKey, Integer, String
+from sqlalchemy import CheckConstraint, ForeignKey, Integer, LargeBinary, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -46,3 +46,6 @@ class User(Base):
         UUID(as_uuid=True), ForeignKey("tenant.id")
     )
     user_id: Mapped[str] = mapped_column(String(326), unique=True, index=True)
+    user_handle: Mapped[bytes] = mapped_column(
+        LargeBinary, unique=True, nullable=True, index=True
+    )
