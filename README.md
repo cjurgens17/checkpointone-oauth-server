@@ -19,6 +19,12 @@ A minimal, multi-tenant OAuth 2.0 authorization server that also supports third 
   <img src="docs/screenshots/signup.png" alt="Signup screen" width="500">
 </p>
 
+<h3 align="center">Passkey Support</h3>
+
+<p align="center">
+  <img src="docs/screenshots/register_passkey.png" alt="Passkey Screen" width="500">
+</p>
+
 ## Getting started
 
 ```bash
