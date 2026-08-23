@@ -10,6 +10,7 @@ from views.callbacks.github import github_callback_bp
 from views.callbacks.google import google_callback_bp
 from views.jwks import jwks_bp
 from views.logout import logout_bp
+from views.passkey import passkey_bp
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -22,6 +23,7 @@ app.register_blueprint(google_callback_bp)
 app.register_blueprint(github_callback_bp)
 app.register_blueprint(jwks_bp)
 app.register_blueprint(logout_bp)
+app.register_blueprint(passkey_bp)
 
 
 @app.get("/")
