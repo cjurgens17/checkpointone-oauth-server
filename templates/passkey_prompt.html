@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block body_class %}auth-background{% endblock %}
+
+{% block content %}
+  <div class="auth-card">
+    <img class="auth-logo" src="{{ url_for('static', filename='assets/checkpointone_logo.svg') }}" alt="CheckpointOne">
+
+    <h1 class="auth-heading">Add a Passkey</h1>
+    <p class="auth-subheading">Sign in faster next time on this device with your fingerprint, face, or PIN.</p>
+
+    <button class="auth-submit auth-submit-green" type="button" id="passkey-register-btn">Register a passkey</button>
+
+    <form method="post" action="{{ url_for('passkey.passkey_prompt_continue') }}">
+      <input type="hidden" name="response_type" value="{{ oauth_params.response_type or '' }}">
+      <input type="hidden" name="client_id" value="{{ oauth_params.client_id or '' }}">
+      <input type="hidden" name="redirect_uri" value="{{ oauth_params.redirect_uri or '' }}">
+      <input type="hidden" name="scope" value="{{ oauth_params.scope or '' }}">
+      <input type="hidden" name="state" value="{{ oauth_params.state or '' }}">
+      <input type="hidden" name="code_challenge" value="{{ oauth_params.code_challenge or '' }}">
+      <input type="hidden" name="code_challenge_method" value="{{ oauth_params.code_challenge_method or '' }}">
+      <input type="hidden" name="audience" value="{{ oauth_params.audience or '' }}">
+      <input type="hidden" name="connection" value="{{ connection or '' }}">
+      <button class="auth-submit" type="submit">Not now</button>
+    </form>
+  </div>
+{% endblock %}
