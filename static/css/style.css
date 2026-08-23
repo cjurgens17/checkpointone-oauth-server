@@ -232,6 +232,14 @@ code {
   background: #1f4fc4;
 }
 
+.auth-submit-green {
+  background: #2e9e5b;
+}
+
+.auth-submit-green:hover {
+  background: #248049;
+}
+
 .auth-link {
   display: block;
   margin-top: 0.75rem;

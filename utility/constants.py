@@ -25,6 +25,7 @@ class IdentityProvider(StrEnum):
 class ScreenHint:
     LOGIN = "login"
     SIGNUP = "signup"
+    REGISTER_PASSKEY = "passkey"
 
 
 class Prompt:
@@ -42,6 +43,6 @@ class RevokeReason:
     ROTATE = "valid_rotation"
 
 
-SCREEN_HINTS = [ScreenHint.LOGIN, ScreenHint.SIGNUP]
+SCREEN_HINTS = [ScreenHint.LOGIN, ScreenHint.SIGNUP, ScreenHint.REGISTER_PASSKEY]
 NATIVE_PROMPTS = [Prompt.NONE, Prompt.LOGIN, Prompt.SELECT_ACCOUNT, Prompt.CONSENT]
 GOOGLE_PROMPTS = [Prompt.CONSENT, Prompt.NONE, Prompt.SELECT_ACCOUNT]

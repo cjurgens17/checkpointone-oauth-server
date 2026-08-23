@@ -5,6 +5,7 @@ from repo.applications import (
     get_application_from_client_id,
     get_tenant_from_application,
 )
+from repo.passkey import user_has_passkey
 from repo.session import get_session_from_session_id
 from repo.user import get_user_from_user_id
 from services.connections.github import (
@@ -51,16 +52,7 @@ from utility.validation import (
 authorize_bp = Blueprint("authorize", __name__)
 
 
-def _issue_auth_code(oauth_params, user, connection):
-    auth_code = create_auth_code(
-        {**oauth_params, "sub": user.sub, "provider_claims": user_claims(user)}
-    )
-    response = redirect(
-        build_encoded_url(
-            oauth_params["redirect_uri"],
-            {"state": oauth_params["state"], "code": auth_code},
-        )
-    )
+def _attach_session_cookie(response, oauth_params, user, connection):
     session_cookie_name, session_id, cookie_options = generate_server_session_cookie(
         user.user_id,
         client_id=oauth_params["client_id"],
@@ -71,6 +63,31 @@ def _issue_auth_code(oauth_params, user, connection):
     )
     response.set_cookie(session_cookie_name, session_id, **cookie_options)
     return response
+
+
+def _issue_auth_code(oauth_params, user, connection):
+    auth_code = create_auth_code(
+        {**oauth_params, "sub": user.sub, "provider_claims": user_claims(user)}
+    )
+    response = redirect(
+        build_encoded_url(
+            oauth_params["redirect_uri"],
+            {"state": oauth_params["state"], "code": auth_code},
+        )
+    )
+    return _attach_session_cookie(response, oauth_params, user, connection)
+
+
+def _render_passkey_prompt(oauth_params, user, connection):
+    response = make_response(
+        render_template(
+            "passkey_prompt.html",
+            title="Add a Passkey",
+            oauth_params=oauth_params,
+            connection=connection,
+        )
+    )
+    return _attach_session_cookie(response, oauth_params, user, connection)
 
 
 @authorize_bp.route("/authorize", methods=["GET", "POST"])
@@ -188,6 +205,7 @@ def authorize():
                     "tenant": tenant,
                     "connection": connection,
                     "password_min_length": MIN_PASSWORD_LENGTH,
+                    "screen_hint": screen_hint,
                 }
 
                 # screen_hint decides which template/flow applies; signup never
@@ -248,6 +266,9 @@ def authorize():
                             error="Incorrect username or password.",
                             username=username,
                         ), 401
+
+                    if not user_has_passkey(user.id) and screen_hint == ScreenHint.REGISTER_PASSKEY:
+                        return _render_passkey_prompt(oauth_params, user, connection)
 
                     return _issue_auth_code(oauth_params, user, connection)
 
