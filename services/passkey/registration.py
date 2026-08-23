@@ -24,7 +24,7 @@ def start_simple_registration_options(
     to_json = options_to_json(simple_registration_options)
 
     print("\n[Registration Options - Simple]")
-    print(options_to_json(to_json))
+    print(to_json)
     return to_json
     
 
@@ -40,7 +40,7 @@ def end_registration_verification(credential, expected_challenge,expected_rp_id,
     #         - `expected_origin`: The domain, with HTTP protocol (e.g. "https://domain.here"), on which
     #           the registration should have occurred. Can also be a list of expected origins.
     if not isinstance(expected_challenge, bytes):
-        base64url_to_bytes(expected_challenge)
+        expected_challenge = base64url_to_bytes(expected_challenge)
     registration_verification = verify_registration_response(
     
     credential=credential,
