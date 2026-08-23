@@ -13,7 +13,7 @@ References below are to the W3C Web Authentication spec (Level 2/3): §5.4 (`Pub
 
 ## 1. Redis challenge issuance & storage
 
-- [ ] **Generate challenges correctly.** Per §13.1, a challenge must come from a CSPRNG and should be at least 16 bytes of entropy. Use `secrets.token_bytes(32)` — same approach already used by `generate_passkey_user_handle()` in `services/passkey.py`.
+- [ ] **Generate challenges correctly.** Per §13.4.3, a challenge must come from a CSPRNG and should be at least 16 bytes of entropy. Use `secrets.token_bytes(32)` — same approach already used by `generate_passkey_user_handle()` in `services/passkey.py`.
 - [ ] **Pick a key namespace.** `create_auth_code()` in `services/tokens/authorization_code.py` uses the token itself as the Redis key. Do the same here, but prefix so registration/authentication challenges can't collide with each other or with auth-code entries in the same Redis DB (e.g. `passkey_reg:<challenge>`, `passkey_auth:<challenge>`).
 - [ ] **Decide what rides along with the challenge.**
   - Registration: you already know the user (session is authenticated) — store `user_id` alongside the challenge so verify-time can confirm the ceremony belongs to the same user who requested it.
@@ -26,6 +26,7 @@ References below are to the W3C Web Authentication spec (Level 2/3): §5.4 (`Pub
 ---
 
 ## 2. Registration (enrollment) endpoints
+call generate_user_handle
 
 ### 2a. Options endpoint — builds `PublicKeyCredentialCreationOptions` (§5.4)
 
