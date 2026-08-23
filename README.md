@@ -1,18 +1,29 @@
-# CheckPointOne OAuth Server
+# CheckPointOne OAuth2.0 Server
 
-A minimal, multi-tenant OAuth 2.0 authorization server
+A minimal, multi-tenant OAuth 2.0 authorization server that also supports third party applications
 ## Features
 
-- Grant Types include Authorization Code Flow w/PKCE, Client Credentials, and more.
-- Branded, variable provider support with enterprise level names such as google and github.
+- Grant Types include authorization_code, client_credentials, and refresh_token.
+- Authorization Code Flows require PKCE for enhanced security
+- OIDC support for Google and Github through upstream federated login. Native Idp Support through CheckPointOne(cp1)
 
-### Login screen
+<h3 align="center">Login screen</h3>
 
-![Login screen](docs/screenshots/login.png)
+<p align="center">
+  <img src="docs/screenshots/login.png" alt="Login screen" width="500">
+</p>
 
-### Signup screen
+<h3 align="center">Signup screen</h3>
 
-![Signup screen](docs/screenshots/signup.png)
+<p align="center">
+  <img src="docs/screenshots/signup.png" alt="Signup screen" width="500">
+</p>
+
+<h3 align="center">Passkey Support</h3>
+
+<p align="center">
+  <img src="docs/screenshots/register_passkey.png" alt="Passkey Screen" width="500">
+</p>
 
 ## Getting started
 
@@ -26,7 +37,7 @@ This builds and starts three services:
 - `db` — Postgres database
 - `redis` — Cache used to store short-lived OAuth state
 
-You can find the client demo app here to play around with an end to end authorization flow:
+You can find the client demo app here to test different Grant Types locally:
 
 https://github.com/cjurgens17/checkpointone-demo-app
 
