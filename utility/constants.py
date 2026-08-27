@@ -1,12 +1,11 @@
 from enum import StrEnum
 
-VALID_OPEN_ID_SCOPE = ["openid", "profile", "email", "address", "phone"]
-
 
 class GrantType(StrEnum):
     CODE_FLOW = "authorization_code"
     CONFIDENTIAL = "client_credentials"
     REFRESH = "refresh_token"
+    TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange"
 
 
 class ClientType:
@@ -42,7 +41,17 @@ class RevokeReason:
     REUSE = "reuse_detected"
     ROTATE = "valid_rotation"
 
+class TokenType(StrEnum):
+    _base = "urn:ietf:oauth:params:oauth:token-type:"
+    ACCESS = f"{_base}access_token"
+    ID = f"{_base}id_token"
+    REFRESH = f"{_base}:refresh_token"
+    JWT = f"{_base}jwt"
+    SAML_1 = f"{_base}saml1"
+    SAML_2 = f"{_base}saml2"
 
+VALID_OPEN_ID_SCOPE = ["openid", "profile", "email", "address", "phone"]
 SCREEN_HINTS = [ScreenHint.LOGIN, ScreenHint.SIGNUP, ScreenHint.REGISTER_PASSKEY]
 NATIVE_PROMPTS = [Prompt.NONE, Prompt.LOGIN, Prompt.SELECT_ACCOUNT, Prompt.CONSENT]
 GOOGLE_PROMPTS = [Prompt.CONSENT, Prompt.NONE, Prompt.SELECT_ACCOUNT]
+TOKEN_TYPES = [TokenType.ACCESS,TokenType.ID,TokenType.REFRESH,TokenType.JWT,TokenType.SAML_1,TokenType.SAML_2]

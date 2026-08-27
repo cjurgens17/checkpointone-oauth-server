@@ -32,7 +32,7 @@ from services.tokens.refresh_token import (
     refresh_token_validity_metadata,
     scope_requires_refresh_token,
 )
-from utility.constants import ClientType, GrantType, RevokeReason
+from utility.constants import TOKEN_TYPES, ClientType, GrantType, RevokeReason
 from utility.helpers import get_current_timestamp
 
 # supporting authorization_code, client_credentials, and refresh_token grant_type
@@ -74,6 +74,38 @@ class OAuthToken(Resource):
                 "error_description": f"Missing required parameter(s): {', '.join(missing)}.",
             }, 400
 
+        if GrantType.TOKEN_EXCHANGE == body.get("grant_type"):
+            #Validate per RFC 8693
+            if not body.get("subject_token") or not body.get("subject_token_type"):
+                return {
+                    "error": "invalid_request",
+                    "error_description": "missing required parametes for token exchange"
+                }, 400
+
+            if not body.get("subject_token_type") in TOKEN_TYPES:
+                return {
+                    "error": "invalid_request",
+                    "error_description": "invalid subject_token_type"
+                }, 400
+
+            if (body.get("actor_token") and not body.get("actor_token_type")) or (body.get("actor_token_type") and not body.get("actor_token")):
+                return {
+                    "error": "invalid_request",
+                    "error_description": "invalid parameters for token exchange"
+                }, 400
+
+            if body.get("actor_token_type") and not body.get("actor_token_type") in TOKEN_TYPES:
+                return {
+                    "error": "invalid_request",
+                    "error_description": "invalid actor_token_type"
+                }, 400
+            # Now we can start the exchange process
+
+            
+
+
+
+            return
         # Handle refresh_token grant_type
         if GrantType.REFRESH == body.get("grant_type"):
             if not body.get("refresh_token"):
