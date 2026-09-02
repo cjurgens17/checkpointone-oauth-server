@@ -88,7 +88,7 @@ class OAuthToken(Resource):
                 return {
                     "error": "invalid_request",
                     "error_description": "requested client is not registered",
-                }
+                }, 400
             if ClientType.WEB_APPLICATION == client.client_type and not body.get(
                 "client_secret"
             ):
@@ -122,12 +122,15 @@ class OAuthToken(Resource):
             if refresh_token_metadata.get("already_used") or refresh_token_metadata.get(
                 "revoked"
             ):
-                # Assume Compromise(refresh token reuse abuse)
                 revoke_refresh_token_family(
                     refresh_token_metadata.get("family_id"),
                     RevokeReason.REUSE,
                     get_current_timestamp(),
                 )
+                return {
+                    "error": "invalid_grant",
+                    "error_description": "new authorization is required",
+                }, 400
             elif refresh_token_metadata.get("expired"):
                 return {
                     "error": "invalid_grant",

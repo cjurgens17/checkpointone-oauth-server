@@ -88,6 +88,8 @@ def valid_scope(scope: str, application_permissions: list[str]):
 
 
 def valid_code_challenge_method(method: str):
+    if not method or not isinstance(method, str):
+        return False
     return method.lower() == "s256"
 
 
