@@ -88,7 +88,7 @@ class OAuthToken(Resource):
                 return {
                     "error": "invalid_request",
                     "error_description": "requested client is not registered",
-                }
+                }, 400
             if ClientType.WEB_APPLICATION == client.client_type and not body.get(
                 "client_secret"
             ):
@@ -128,6 +128,17 @@ class OAuthToken(Resource):
                     RevokeReason.REUSE,
                     get_current_timestamp(),
                 )
+                # The family is dead, so the caller has to start over. Returning
+                # here also stops execution falling out of this grant's branch and
+                # into the authorization_code handler below, which used to answer
+                # a refresh request with "missing required code parameter".
+                # The wording matches the expired case on purpose: it is accurate,
+                # and it avoids confirming to a caller holding a stolen token that
+                # reuse detection just fired.
+                return {
+                    "error": "invalid_grant",
+                    "error_description": "new authorization is required",
+                }, 400
             elif refresh_token_metadata.get("expired"):
                 return {
                     "error": "invalid_grant",
