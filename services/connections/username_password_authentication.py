@@ -29,12 +29,6 @@ _PROFILE_CLAIM_FIELDS = [
 def authenticate_user(email: str, password: str):
     if not email or not password:
         return None
-
-    # A Google or GitHub account is stored with password=None. Submitting that
-    # address through the native form used to reach check_password_hash(None, ...),
-    # which raised and turned the request into a 500 - both a crash and a way to
-    # tell a federated account apart from one that does not exist, since a wrong
-    # password answers 401. Federated users now fail the same way as everyone else.
     user = get_user_from_email(email)
     if not user or not user.password:
         return None
