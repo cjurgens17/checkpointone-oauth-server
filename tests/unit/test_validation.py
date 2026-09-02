@@ -162,11 +162,11 @@ class TestValidCodeChallengeMethod:
     def test_rejects_anything_weaker_than_s256(self, method):
         assert valid_code_challenge_method(method) is False
 
-    def test_raises_on_none_rather_than_returning_false(self):
-        # Documents current behaviour: callers must not pass None here. The
-        # authorize view always supplies a string from request.values.
-        with pytest.raises(AttributeError):
-            valid_code_challenge_method(None)
+    @pytest.mark.parametrize("method", [None, "", 256, b"S256"])
+    def test_rejects_missing_and_non_string_input(self, method):
+        # Regression guard: an unguarded .lower() here turned an omitted
+        # code_challenge_method into a 500 on /authorize.
+        assert valid_code_challenge_method(method) is False
 
 
 class TestValidConnection:

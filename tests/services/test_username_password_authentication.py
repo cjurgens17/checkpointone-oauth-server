@@ -61,27 +61,33 @@ class TestAuthenticateUser:
         assert stored_user.password != DEFAULT_PASSWORD
         assert check_password_hash(stored_user.password, DEFAULT_PASSWORD)
 
-    def test_a_federated_user_with_no_password_crashes_instead_of_failing_cleanly(
-        self, monkeypatch
+    @pytest.mark.parametrize(
+        "connection", [IdentityProvider.GOOGLE, IdentityProvider.GITHUB]
+    )
+    def test_a_federated_user_cannot_authenticate_through_the_native_form(
+        self, monkeypatch, connection
     ):
-        """Pins a real defect rather than asserting intended behaviour.
-
-        Google and GitHub accounts are stored with ``password=None``. If such an
-        address is submitted through the native login form,
-        ``check_password_hash(None, ...)`` raises ``AttributeError`` and the
-        request becomes a 500 instead of the 401 that a wrong password produces.
-
-        Beyond the crash, the differing status codes let an unauthenticated
-        caller tell a federated account apart from one that does not exist,
-        which is a user-enumeration oracle. The fix is a
-        ``if not user.password`` guard in ``authenticate_user`` returning None;
-        this test should then be rewritten to assert that.
-        """
-        federated = make_user(connection=IdentityProvider.GOOGLE)
+        # Regression guard: check_password_hash(None, ...) used to raise here,
+        # turning the request into a 500.
+        federated = make_user(connection=connection)
         federated.password = None
         monkeypatch.setattr(native, "get_user_from_email", lambda email: federated)
-        with pytest.raises(AttributeError):
-            authenticate_user(federated.email, "anything")
+        assert authenticate_user(federated.email, "anything") is None
+
+    def test_a_federated_account_is_indistinguishable_from_a_missing_one(
+        self, monkeypatch
+    ):
+        # The 500-vs-401 difference was a user-enumeration oracle.
+        federated = make_user(connection=IdentityProvider.GOOGLE)
+        federated.password = None
+
+        monkeypatch.setattr(native, "get_user_from_email", lambda email: federated)
+        federated_result = authenticate_user(federated.email, "anything")
+
+        monkeypatch.setattr(native, "get_user_from_email", lambda email: None)
+        missing_result = authenticate_user("nobody@checkpointone.com", "anything")
+
+        assert federated_result is missing_result is None
 
 
 class TestEmailAlreadyRegistered:

@@ -125,29 +125,34 @@ class TestParameterErrorsRedirectBack:
 
 
 class TestValidationOrdering:
-    def test_missing_code_challenge_method_crashes_the_endpoint(self, app, authorize_env):
-        """Pins a real defect rather than asserting intended behaviour.
+    def test_missing_code_challenge_method_redirects_with_an_oauth_error(
+        self, client, authorize_env
+    ):
+        # Regression guard: an unguarded .lower() made this a 500 rather than an
+        # OAuth error, reachable by any unauthenticated caller.
+        query = authorize_query()
+        del query["code_challenge_method"]
+        response = client.get("/authorize", query_string=query)
+        assert response.status_code == 302
+        assert _error(response)["error"] == ["invalid_code_challenge_method"]
 
-        ``code_challenge_method`` is optional in the request but
-        ``valid_code_challenge_method`` calls ``method.lower()`` unguarded, so
-        omitting it raises ``AttributeError`` and the response is a 500. Every
-        other missing parameter on this endpoint produces a redirect carrying an
-        OAuth error code; this one takes the whole request down.
-
-        It is reachable by any unauthenticated caller, which makes it a cheap
-        way to fill the error logs. The fix is a falsy check in
-        ``valid_code_challenge_method`` (or an ``if not code_challenge_method``
-        guard in the view) returning ``invalid_code_challenge_method``. This test
-        should then be rewritten to assert that redirect.
-        """
-        # TESTING=True normally re-raises; disabling propagation shows what a
-        # deployed instance actually returns to the caller.
+    def test_no_missing_parameter_produces_a_server_error(self, app, authorize_env):
         app.config["PROPAGATE_EXCEPTIONS"] = False
         try:
-            query = authorize_query()
-            del query["code_challenge_method"]
-            response = app.test_client().get("/authorize", query_string=query)
-            assert response.status_code == 500
+            test_client = app.test_client()
+            for omitted in (
+                "response_type",
+                "scope",
+                "code_challenge",
+                "code_challenge_method",
+                "connection",
+                "state",
+                "audience",
+            ):
+                query = authorize_query()
+                query.pop(omitted, None)
+                response = test_client.get("/authorize", query_string=query)
+                assert response.status_code < 500, f"omitting {omitted} caused a 5xx"
         finally:
             app.config.pop("PROPAGATE_EXCEPTIONS", None)
 

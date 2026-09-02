@@ -152,8 +152,9 @@ class TestValidCodeChallenge:
             is True
         )
 
-    def test_raises_when_the_method_is_missing(self):
-        # Documents current behaviour - the token resource always passes the
-        # method recorded on the authorization code.
-        with pytest.raises(AttributeError):
-            valid_code_challenge(self.VERIFIER, None, hash_sha256(self.VERIFIER))
+    @pytest.mark.parametrize("method", [None, ""])
+    def test_rejects_a_missing_method_even_with_a_correct_verifier(self, method):
+        assert (
+            valid_code_challenge(self.VERIFIER, method, hash_sha256(self.VERIFIER))
+            is False
+        )

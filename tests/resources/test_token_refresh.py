@@ -14,6 +14,7 @@ from tests.factories import (
     DEFAULT_CLIENT_ID,
     DEFAULT_CLIENT_SECRET,
     DEFAULT_CONFIDENTIAL_CLIENT_ID,
+    make_application,
     make_confidential_application,
     make_refresh_token_record,
 )
@@ -156,33 +157,42 @@ class TestRefreshTokenReuseDetection:
             response.get_json() or {}
         )
 
-    def test_reuse_falls_through_into_the_authorization_code_handler(
-        self, client, refresh_flow
-    ):
-        """Pins a real control-flow defect rather than asserting intended behaviour.
-
-        After revoking the family, ``refresh_token_metadata["valid"]`` is False,
-        so the ``if refresh_token_metadata.get("valid")`` block never returns.
-        Execution then leaves the ``if GrantType.REFRESH`` branch entirely and
-        drops into the authorization_code handler below it, which reports
-        ``missing required code parameter`` - a nonsensical answer to a
-        refresh_token request.
-
-        The security response is still correct: the family really is revoked. But
-        the client is told the wrong thing, and grant types are not isolated from
-        one another. RFC 6749 section 5.2 calls for ``invalid_grant`` here.
-
-        Adding an explicit ``invalid_grant`` return after the reuse branch should
-        make this fail; it should then be rewritten to assert that.
-        """
+    def test_reuse_is_reported_as_invalid_grant(self, client, refresh_flow):
         refresh_flow["record"] = make_refresh_token_record(
             used_at=datetime.now(timezone.utc)
         )
         response = _post(client)
         assert response.status_code == 400
-        assert response.get_json()["error_description"] == (
-            "missing required code parameter"
+        assert response.get_json()["error"] == "invalid_grant"
+
+    def test_reuse_does_not_leak_into_the_authorization_code_handler(
+        self, client, refresh_flow
+    ):
+        # Regression guard: the reuse branch used to fall out of the refresh
+        # grant entirely and answer "missing required code parameter".
+        refresh_flow["record"] = make_refresh_token_record(
+            used_at=datetime.now(timezone.utc)
         )
+        description = _post(client).get_json()["error_description"]
+        assert "code parameter" not in description
+
+    def test_reuse_does_not_disclose_that_detection_fired(self, client, refresh_flow):
+        # The wording matches the expired case so a caller holding a stolen token
+        # cannot tell revocation apart from ordinary expiry.
+        refresh_flow["record"] = make_refresh_token_record(
+            used_at=datetime.now(timezone.utc)
+        )
+        reused = _post(client).get_json()
+
+        issued = datetime.now(timezone.utc) - timedelta(days=30)
+        refresh_flow["record"] = make_refresh_token_record(
+            iat=issued,
+            exp=issued + timedelta(days=7),
+            absolute_exp=issued + timedelta(days=14),
+        )
+        expired = _post(client).get_json()
+
+        assert reused == expired
 
 
 class TestRefreshTokenRejections:
@@ -210,26 +220,36 @@ class TestRefreshTokenRejections:
         assert response.status_code == 400
         assert response.get_json()["error"] == "invalid_grant"
 
-    def test_unregistered_client_is_reported_with_a_200_status(
+    def test_unregistered_client_is_rejected_with_400(
         self, client, refresh_flow, monkeypatch
     ):
-        """Pins a real defect rather than asserting intended behaviour.
-
-        The ``if not client`` branch in the refresh handler returns a bare dict
-        with no status code, so Flask-RESTful serialises it as ``200 OK`` while
-        the body says ``invalid_request``. Every sibling branch returns
-        ``..., 400``; this one is missing the tuple.
-
-        A client checking ``response.ok`` would treat an unregistered client as a
-        success and then fail on the absent access_token. Adding ``, 400`` should
-        make this fail; it should then be rewritten to assert the 400.
-        """
+        # Regression guard: this branch used to return a bare dict with no status
+        # tuple, which Flask-RESTful served as 200 OK alongside an error body.
         monkeypatch.setattr(
             token_resource, "get_application_from_client_id", lambda cid: None
         )
         response = _post(client)
-        assert response.status_code == 200
+        assert response.status_code == 400
         assert response.get_json()["error"] == "invalid_request"
+
+    def test_no_rejection_path_returns_a_2xx(self, client, refresh_flow, monkeypatch):
+        monkeypatch.setattr(
+            token_resource, "get_application_from_client_id", lambda cid: None
+        )
+        unregistered = _post(client)
+
+        monkeypatch.setattr(
+            token_resource, "get_application_from_client_id", lambda cid: make_application()
+        )
+        monkeypatch.setattr(
+            token_resource, "get_refresh_token_from_token_hash", lambda h: None
+        )
+        unknown_token = _post(client)
+        missing_token = _post(client, refresh_token=None)
+
+        for response in (unregistered, unknown_token, missing_token):
+            assert response.status_code == 400
+            assert "access_token" not in response.get_json()
 
     def test_no_tokens_are_issued_when_the_grant_is_refused(self, client, refresh_flow):
         _post(client, refresh_token=None)

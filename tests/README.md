@@ -63,7 +63,21 @@ them into the importing module. Stubs therefore patch the **call site**
 
 ## Tests that pin known defects
 
-A few tests assert current, wrong behaviour so a fix is noticed rather than
-silently changing an untested contract. Each carries a docstring explaining the
-defect and says it should be rewritten once fixed. Search for
-`rather than asserting intended behaviour` to find them all.
+A test that asserts current, wrong behaviour carries a docstring explaining the
+defect and saying it should be rewritten once fixed, so a fix is noticed rather
+than silently changing an untested contract. Search for
+`rather than asserting intended behaviour` to find them.
+
+One remains: `set_passkey_challenge()` raises `TypeError` because
+`generate_challenge()` returns `bytes` and `cache_set` serialises with
+`json.dumps`. It is left pinned because the passkey feature is deferred.
+
+The other five have been fixed and their tests now assert the corrected
+behaviour, kept as regression guards:
+
+| Defect | Guard lives in |
+|---|---|
+| refresh-token reuse fell through into the authorization_code handler | `tests/resources/test_token_refresh.py` |
+| unregistered client on the refresh grant answered 200 | `tests/resources/test_token_refresh.py` |
+| missing `code_challenge_method` returned 500 | `tests/unit/test_validation.py`, `tests/views/test_authorize_validation.py`, `tests/services/test_authorization_code.py` |
+| federated user through the native form returned 500 | `tests/services/test_username_password_authentication.py` |
