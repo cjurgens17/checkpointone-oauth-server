@@ -1,0 +1,16 @@
+-r requirements.txt
+
+# Test framework and the doubles it needs.
+pytest==9.1.1
+pytest-cov==7.1.0
+
+# In-memory Redis so cache-backed flows (authorization codes, federated state,
+# passkey challenges) run without a Redis daemon.
+fakeredis==2.37.1
+
+# Intercepts the `requests` calls made to Google and GitHub token/userinfo
+# endpoints so no test ever reaches the network.
+responses==0.26.3
+
+# Deterministic clock for token lifetime and session expiry assertions.
+freezegun==1.5.5
