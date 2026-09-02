@@ -29,9 +29,10 @@ _PROFILE_CLAIM_FIELDS = [
 def authenticate_user(email: str, password: str):
     if not email or not password:
         return None
-
     user = get_user_from_email(email)
-    if not user or not check_password_hash(user.password, password):
+    if not user or not user.password:
+        return None
+    if not check_password_hash(user.password, password):
         return None
     return user
 
