@@ -122,19 +122,11 @@ class OAuthToken(Resource):
             if refresh_token_metadata.get("already_used") or refresh_token_metadata.get(
                 "revoked"
             ):
-                # Assume Compromise(refresh token reuse abuse)
                 revoke_refresh_token_family(
                     refresh_token_metadata.get("family_id"),
                     RevokeReason.REUSE,
                     get_current_timestamp(),
                 )
-                # The family is dead, so the caller has to start over. Returning
-                # here also stops execution falling out of this grant's branch and
-                # into the authorization_code handler below, which used to answer
-                # a refresh request with "missing required code parameter".
-                # The wording matches the expired case on purpose: it is accurate,
-                # and it avoids confirming to a caller holding a stolen token that
-                # reuse detection just fired.
                 return {
                     "error": "invalid_grant",
                     "error_description": "new authorization is required",
