@@ -88,6 +88,11 @@ def valid_scope(scope: str, application_permissions: list[str]):
 
 
 def valid_code_challenge_method(method: str):
+    # code_challenge_method is absent on any request that simply omits it, so this
+    # has to answer False rather than raising - an unguarded .lower() turned a
+    # missing parameter into a 500 on /authorize instead of an OAuth error.
+    if not method or not isinstance(method, str):
+        return False
     return method.lower() == "s256"
 
 
